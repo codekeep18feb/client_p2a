@@ -626,7 +626,7 @@ export function initialize(loggedInUser) {
     }
 
 
-    if (loggedInUser && loggedInUser.full_name) {
+    if (loggedInUser) {
       console.log("Now we can just updae the title");
 
       // Then find the chat_header and the h3 element inside it
@@ -634,7 +634,7 @@ export function initialize(loggedInUser) {
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
 
-      loginMessage.textContent = loggedInUser.full_name;
+      loginMessage.textContent = loggedInUser.full_name || loggedInUser.id;
 
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
