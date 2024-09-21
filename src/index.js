@@ -5,6 +5,7 @@
 import "./style.css";
 import io from 'socket.io-client';
 import myImage from "./tezkit_logo.jpg";
+const identifiers = {}
 
 
 const APP_NAME = "app1_t2" // this should technically be fetched by credentials??
@@ -269,15 +270,22 @@ export function initialize(loggedInUser) {
     socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
-    console.log("user on consumer joined", "global_for__" + loggedInUser.id);
+    const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    console.log("here is the logedddd",tezkit_app_p_data.settings.authCloudManaged,loggedInUser,tezkit_app_p_data);
+    
+    if (tezkit_app_p_data.settings.authCloudManaged){
+      identifiers["uid"]="id"
+    }
+    console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
-    socket.emit("join_room", { room: "global_for__" + loggedInUser.id });
+    socket.emit("join_room", { room: "global_for__" + identifiers["uid"] });
 
     // socket.emit('ON_MESSAGE_STATUS_CHANGED', );
     // console.log("waterw .id",loggedInUser)
 
-    // console.log('joined room :: ',"global_for__" + loggedInUser.id)
-    // socket.emit("join_room", { room: "global_for__" + loggedInUser.id });
+    // console.log('joined room :: ',"global_for__" + identifiers["uid"])
+    // socket.emit("join_room", { room: "global_for__" + identifiers["uid"] });
 
     socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
       console.log("isndie readl one", data)
@@ -634,7 +642,7 @@ export function initialize(loggedInUser) {
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
 
-      loginMessage.textContent = loggedInUser.full_name || loggedInUser.id;
+      loginMessage.textContent = loggedInUser.full_name || identifiers["uid"];
 
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
@@ -762,7 +770,7 @@ export function initialize(loggedInUser) {
   //     "message": "inputBox.value",
   //     "timestamp": new Date().toLocaleTimeString(),
   //     "frm_user": {
-  //         "id": loggedInUser.id,
+  //         "id": identifiers["uid"],
   //         "user": loggedInUser.full_name
   //     },
   //     "to_user": {
@@ -873,7 +881,7 @@ export function initialize(loggedInUser) {
         message: chatInput.value,
         timestamp: new Date().toLocaleTimeString(),
         frm_user: {
-          id: loggedInUser.id,
+          id: identifiers["uid"],
           user: loggedInUser.full_name,
         },
         to_user: {
@@ -1221,6 +1229,41 @@ async function handleLogin(event) {
       console.log("wahte is ti", responseData);
       console.log("Token:", responseData.token); // Assuming token is in the response data
       localStorage.setItem("tezkit_token", responseData.token);
+
+      const app_name = localStorage.getItem("tezkit_app_name")
+
+      if (app_name){
+        const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
+    
+      const headersList = {
+          "Accept": "*/*",
+          "User-Agent": "YourAppName",
+          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4" 
+      };
+  
+      try {
+          const response = await fetch(reqUrl, {
+              method: "GET",
+              headers: headersList
+          });
+  
+          if (response.ok) {
+              const data = await response.json();
+              console.log(data);
+  
+              // Optionally store data in localStorage if needed
+              localStorage.setItem("tezkit_app_data", JSON.stringify(data));
+          } else {
+              console.error(`Error: ${response.status} - ${response.statusText}`);
+          }
+      } catch (error) {
+          console.error('Request failed:', error);
+      }
+      }
+      else{
+      console.error("app_name not provided to the client!");
+
+      }
       // Navigate to / root on successful login
       routeToRoot("/package-consumer/index.html");
     } else {
