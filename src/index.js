@@ -277,15 +277,15 @@ export function initialize(loggedInUser) {
     if (tezkit_app_p_data.settings.authCloudManaged){
       identifiers["uid"]="id"
     }
-    console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
+    console.log("user on consumer joined", "global_for__" + loggedInUser[identifiers["uid"]]);
 
-    socket.emit("join_room", { room: "global_for__" + identifiers["uid"] });
+    socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["uid"]] });
 
     // socket.emit('ON_MESSAGE_STATUS_CHANGED', );
     // console.log("waterw .id",loggedInUser)
 
-    // console.log('joined room :: ',"global_for__" + identifiers["uid"])
-    // socket.emit("join_room", { room: "global_for__" + identifiers["uid"] });
+    // console.log('joined room :: ',"global_for__" + loggedInUser[identifiers["uid"]])
+    // socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["uid"]] });
 
     socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
       console.log("isndie readl one", data)
@@ -642,7 +642,7 @@ export function initialize(loggedInUser) {
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
 
-      loginMessage.textContent = loggedInUser.full_name || identifiers["uid"];
+      loginMessage.textContent = loggedInUser.full_name || loggedInUser[identifiers["uid"]];
 
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
@@ -770,7 +770,7 @@ export function initialize(loggedInUser) {
   //     "message": "inputBox.value",
   //     "timestamp": new Date().toLocaleTimeString(),
   //     "frm_user": {
-  //         "id": identifiers["uid"],
+  //         "id": loggedInUser[identifiers["uid"]],
   //         "user": loggedInUser.full_name
   //     },
   //     "to_user": {
@@ -881,7 +881,7 @@ export function initialize(loggedInUser) {
         message: chatInput.value,
         timestamp: new Date().toLocaleTimeString(),
         frm_user: {
-          id: identifiers["uid"],
+          id: loggedInUser[identifiers["uid"]],
           user: loggedInUser.full_name,
         },
         to_user: {
