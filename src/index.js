@@ -276,7 +276,7 @@ export function initialize(loggedInUser) {
     
     if (tezkit_app_data){
       const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-      console.log("here is the logedddd",tezkit_app_p_data.settings.authCloudManaged,loggedInUser,tezkit_app_p_data);
+      // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
       if (tezkit_app_p_data.settings.authCloudManaged){
         identifiers["name_idn"]="id"
@@ -333,7 +333,7 @@ export function initialize(loggedInUser) {
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
 
-    console.log("user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+    console.log(loggedInUser,identifiers,"user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
 
     socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
