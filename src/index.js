@@ -5,14 +5,14 @@
 import "./style.css";
 import io from 'socket.io-client';
 import myImage from "./tezkit_logo.jpg";
-const identifiers = {}
 
 
-const APP_NAME = "app1_t2" // this should technically be fetched by credentials??
+// const APP_NAME = "app1_t2" // this should technically be fetched by credentials??
 
 let global_bucket = { unread_msgs: [] };
 export { global_bucket };
 
+const identifiers = {}
 
 
 let chat_modal_open = false
@@ -265,27 +265,83 @@ export function initialize(loggedInUser) {
   // socket = socket;
 
   if (loggedInUser) {
+    console.log("loggedInUserasdfasd",loggedInUser)
     // const io = await require('socket.io-client') // For client-side connection
 
     socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
     const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    console.log("here is the logedddd",tezkit_app_p_data.settings.authCloudManaged,loggedInUser,tezkit_app_p_data);
-    
-    if (tezkit_app_p_data.settings.authCloudManaged){
-      identifiers["uid"]="id"
-    }
-    console.log("user on consumer joined", "global_for__" + loggedInUser[identifiers["uid"]]);
 
-    socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["uid"]] });
+    
+    if (tezkit_app_data){
+      const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+      // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
+
+      if (tezkit_app_p_data.settings.authCloudManaged){
+        identifiers["name_idn"]="id"
+      }
+      else if(tezkit_app_p_data.settings.authCloudManaged===false){
+        identifiers["name_idn"]="uid"
+       
+      }
+    }
+    else {
+      const app_name = localStorage.getItem("tezkit_app_name");
+      if (app_name) {
+        console.log("arerewrewrew")
+        const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
+        const headersList = {
+          "Accept": "*/*",
+          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4"
+        };
+
+        try {
+          fetch(reqUrl, {
+            method: "GET",
+            headers: headersList
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                console.error(`Error: ${response.status} - ${response.statusText}`);
+              }
+            })
+            .then((data) => {
+              if (data) {
+                console.log("APP DATA", data);
+                localStorage.setItem("tezkit_app_data", JSON.stringify(data));
+              }
+            })
+            .catch((error) => {
+              console.error('Request failed:', error);
+            });
+        } catch (error) {
+          console.error('Request failed:', error);
+        }
+        
+        
+        
+      } else {
+        console.error("app_name not provided to the client!");
+      }
+    
+    
+    }
+
+    // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
+
+
+    console.log(loggedInUser,identifiers,"user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+
+    socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
     // socket.emit('ON_MESSAGE_STATUS_CHANGED', );
     // console.log("waterw .id",loggedInUser)
 
-    // console.log('joined room :: ',"global_for__" + loggedInUser[identifiers["uid"]])
-    // socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["uid"]] });
+    // console.log('joined room :: ',"global_for__" + loggedInUser[identifiers["name_idn"]])
+    // socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
     socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
       console.log("isndie readl one", data)
@@ -642,7 +698,7 @@ export function initialize(loggedInUser) {
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
 
-      loginMessage.textContent = loggedInUser.full_name || loggedInUser[identifiers["uid"]];
+      loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
@@ -770,7 +826,7 @@ export function initialize(loggedInUser) {
   //     "message": "inputBox.value",
   //     "timestamp": new Date().toLocaleTimeString(),
   //     "frm_user": {
-  //         "id": loggedInUser[identifiers["uid"]],
+  //         "id": loggedInUser[identifiers["name_idn"]],
   //         "user": loggedInUser.full_name
   //     },
   //     "to_user": {
@@ -881,8 +937,8 @@ export function initialize(loggedInUser) {
         message: chatInput.value,
         timestamp: new Date().toLocaleTimeString(),
         frm_user: {
-          id: loggedInUser[identifiers["uid"]],
-          user: loggedInUser.full_name,
+          id: loggedInUser[identifiers["name_idn"]],
+          // user: loggedInUser.full_name,
         },
         to_user: {
           id: 1,
@@ -1105,6 +1161,7 @@ function createSignupForm() {
     };
 
     try {
+      console.log("is it running??")
       const response = await fetch(
         "https://js0spkks6a.execute-api.ap-south-1.amazonaws.com/prod/signup",
         {
@@ -1212,6 +1269,7 @@ async function handleLogin(event) {
     "User-Agent": "Thunder Client (https://www.thunderclient.com)",
     "Content-Type": "application/json",
   };
+  console.log("is it running222??")
 
   try {
     const response = await fetch(
@@ -1232,38 +1290,40 @@ async function handleLogin(event) {
 
       const app_name = localStorage.getItem("tezkit_app_name")
 
-      if (app_name){
-        const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
+      console.log("areweherdde?")
+      // if (app_name){
+      //   const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
     
-      const headersList = {
-          "Accept": "*/*",
-          "User-Agent": "YourAppName",
-          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4" 
-      };
-  
-      try {
-          const response = await fetch(reqUrl, {
-              method: "GET",
-              headers: headersList
-          });
-  
-          if (response.ok) {
-              const data = await response.json();
-              console.log(data);
-  
-              // Optionally store data in localStorage if needed
-              localStorage.setItem("tezkit_app_data", JSON.stringify(data));
-          } else {
-              console.error(`Error: ${response.status} - ${response.statusText}`);
-          }
-      } catch (error) {
-          console.error('Request failed:', error);
-      }
-      }
-      else{
-      console.error("app_name not provided to the client!");
+      // const headersList = {
+      //     "Accept": "*/*",
+      //     // HARDCODED TENANT TOKEN BUT WILL CHANGE IT AND PROVIDE api_key as well.
 
-      }
+      //     "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4" 
+      // };
+  
+      // try {
+      //     const response = await fetch(reqUrl, {
+      //         method: "GET",
+      //         headers: headersList
+      //     });
+  
+      //     if (response.ok) {
+      //         const data = await response.json();
+      //         console.log("APP DATAA",data);
+  
+      //         // Optionally store data in localStorage if needed
+      //         localStorage.setItem("tezkit_app_data", JSON.stringify(data));
+      //     } else {
+      //         console.error(`Error: ${response.status} - ${response.statusText}`);
+      //     }
+      // } catch (error) {
+      //     console.error('Request failed:', error);
+      // }
+      // }
+      // else{
+      // console.error("app_name not provided to the client!");
+
+      // }
       // Navigate to / root on successful login
       routeToRoot("/package-consumer/index.html");
     } else {
