@@ -198,10 +198,7 @@ export function renderAuthHeader(token) {
     // chatIcon.addEventListener('click', toggleChatModal);
     // rightPart.appendChild(chatIcon);
 
-    // Add the new make_comp button
-    const makeCompButton = createButtonComp("Make Comp", () => {
-      renderCustomizeComponent();
-    });
+   
   } else {
     const loginButton = createButtonComp("Login", () => {
       routeToLogin();
@@ -628,17 +625,39 @@ export function initialize(loggedInUser) {
   }
 
   const token = localStorage.getItem("tezkit_token");
+  
 
-  if (!token) {
-    console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
 
-    renderAuthHeader();
-  } else {
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
-    renderAuthHeader(token);
 
-    // rightPart.appendChild(makeCompButton);
-  }
+    //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    console.log("here is the fdghfjghjhgfj",tezkit_app_data);
+    
+  if (tezkit_app_data){
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    console.log("here is the tezkit_app_p_data.settings.authCloudManaged",tezkit_app_p_data);
+
+    if (tezkit_app_p_data.settings.authCloudManaged){
+
+      if (!token) {
+        console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
+    
+        renderAuthHeader();
+      } else {
+    
+        renderAuthHeader(token);
+    
+        // rightPart.appendChild(makeCompButton);
+      }
+    
+
+    }
+
+
+
+    }
+  
 
   console.log("are we here yet!");
 
