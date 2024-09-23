@@ -18,6 +18,14 @@ const identifiers = {}
 let chat_modal_open = false
 export { chat_modal_open };
 
+
+function incrementNotificationsCount() {
+  const notification_num_div = document.getElementById("notification_num");
+      notification_num_div.textContent =
+        Number(notification_num_div.textContent) + 1;
+}
+
+
 // Function to change the background color of the body
 export function changeBackgroundColor() {
   const colors = ["#FF5733", "#33FF57", "#5733FF", "#33B5E5", "#FFC300"];
@@ -353,9 +361,20 @@ export function initialize(loggedInUser) {
         timestamp: new Date().toLocaleTimeString(),
       });
 
-      const notification_num_div = document.getElementById("notification_num");
-      notification_num_div.textContent =
-        Number(notification_num_div.textContent) + 1;
+      const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+
+    
+      if (tezkit_app_data){
+        const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+        // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
+
+        if (tezkit_app_p_data.settings.authCloudManaged){
+          incrementNotificationsCount()
+
+        }
+       
+      }
+
 
       // const sd = JSON.parse(data)
       const msg = p_data["message"]["message"];
