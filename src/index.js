@@ -933,6 +933,8 @@ export function initialize(loggedInUser) {
         let filesHtml = '';
         if (newMessage.result.files && newMessage.result.files.length > 0) {
           filesHtml = newMessage.result.files.map(fileUrl => {
+
+            // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
             return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
           }).join("");
         }
