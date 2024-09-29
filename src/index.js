@@ -280,6 +280,7 @@ export function initialize(loggedInUser) {
       identifiers["name_idn"]="uid"
      
     }
+    console.log("aerwer where herever",identifiers)
 // https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=app1_acm_true_tenant2
 // {{app_path}}/get_app?act_type=user&app_name=app1_acm_true_tenant2
   }
@@ -740,7 +741,7 @@ export function initialize(loggedInUser) {
       const chatHeader = chat_modal.querySelector(".chat_header");
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
-
+      console.log("identifiersfdgsd",identifiers)
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
@@ -1131,17 +1132,19 @@ function createSignupForm() {
 
   // Full name input
   const fullNameInput = createFormInput(
-    "text",
+    "full_name",
     "Enter your full name",
-    "full_name"
+    "text",
+
   );
   form.appendChild(fullNameInput);
 
   // Phone number input
   const phoneInput = createFormInput(
-    "text",
+    "phone",
     "Enter your phone number",
-    "phone"
+    "text",
+    
   );
   form.appendChild(phoneInput);
 
@@ -1190,6 +1193,10 @@ function createSignupForm() {
 
 
   const app_name_ls = localStorage.getItem('tezkit_app_name')
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+  console.log("what is ittezkit_app_data",tezkit_app_data)
+  const tezkit_app_pdata = JSON.parse(tezkit_app_data)
+  console.log("there is thenat",tezkit_app_pdata.tenant_id)
   // Form submission handling
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1199,10 +1206,11 @@ function createSignupForm() {
       email: formData.get("email"),
       phone: formData.get("phone"),
       password: formData.get("password"),
-      gender: formData.get("gender"),
       type: "user",
-      tenant: "tenant1",
+      tenant: tezkit_app_pdata.tenant_id,
+      gender: formData.get("gender"),
       app_name: app_name_ls,
+      role: 65536
     };
 
     try {
@@ -1213,6 +1221,7 @@ function createSignupForm() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-API-Key":tezkit_app_pdata.auth_key
           },
           body: JSON.stringify(data),
         }
