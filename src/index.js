@@ -268,6 +268,68 @@ export function initialize(loggedInUser) {
   // Attach the function to the resize event
   window.addEventListener('resize', checkViewportSize);
   // socket = socket;
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+
+  if (tezkit_app_data){
+    console.log("are you here?")
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
+
+    if (tezkit_app_p_data.settings.authCloudManaged){
+      identifiers["name_idn"]="id"
+    }
+    else if(tezkit_app_p_data.settings.authCloudManaged===false){
+      identifiers["name_idn"]="uid"
+     
+    }
+    console.log("aerwer where herever",identifiers)
+// https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=app1_acm_true_tenant2
+// {{app_path}}/get_app?act_type=user&app_name=app1_acm_true_tenant2
+  }
+  else {
+    const app_name = localStorage.getItem("tezkit_app_name");
+    console.log("arewe gonna fire this!!")
+    if (app_name) {
+      console.log("arerewrewrew")
+      const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
+      const headersList = {
+        "Accept": "*/*",
+        "X-API-Key": "dGVuYW50Ml9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50Mg=="
+      };
+
+      try {
+        fetch(reqUrl, {
+          method: "GET",
+          headers: headersList
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              console.error(`Error: ${response.status} - ${response.statusText}`);
+            }
+          })
+          .then((data) => {
+            if (data) {
+              console.log("APP DATA", data);
+              localStorage.setItem("tezkit_app_data", JSON.stringify(data));
+            }
+          })
+          .catch((error) => {
+            console.error('Request failed:', error);
+          });
+      } catch (error) {
+        console.error('Request failed:', error);
+      }
+      
+      
+      
+    } else {
+      console.error("app_name not provided to the client!");
+    }
+  
+  
+  }
 
   if (loggedInUser) {
     console.log("loggedInUserasdfasd",loggedInUser)
@@ -276,64 +338,9 @@ export function initialize(loggedInUser) {
     socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
-    const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
     
-    if (tezkit_app_data){
-      const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-      // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
-
-      if (tezkit_app_p_data.settings.authCloudManaged){
-        identifiers["name_idn"]="id"
-      }
-      else if(tezkit_app_p_data.settings.authCloudManaged===false){
-        identifiers["name_idn"]="uid"
-       
-      }
-    }
-    else {
-      const app_name = localStorage.getItem("tezkit_app_name");
-      if (app_name) {
-        console.log("arerewrewrew")
-        const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
-        const headersList = {
-          "Accept": "*/*",
-          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4"
-        };
-
-        try {
-          fetch(reqUrl, {
-            method: "GET",
-            headers: headersList
-          })
-            .then((response) => {
-              if (response.ok) {
-                return response.json();
-              } else {
-                console.error(`Error: ${response.status} - ${response.statusText}`);
-              }
-            })
-            .then((data) => {
-              if (data) {
-                console.log("APP DATA", data);
-                localStorage.setItem("tezkit_app_data", JSON.stringify(data));
-              }
-            })
-            .catch((error) => {
-              console.error('Request failed:', error);
-            });
-        } catch (error) {
-          console.error('Request failed:', error);
-        }
-        
-        
-        
-      } else {
-        console.error("app_name not provided to the client!");
-      }
-    
-    
-    }
+   
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
@@ -361,7 +368,6 @@ export function initialize(loggedInUser) {
         timestamp: new Date().toLocaleTimeString(),
       });
 
-      const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
     
       if (tezkit_app_data){
@@ -647,7 +653,6 @@ export function initialize(loggedInUser) {
   
 
 
-  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
 
     //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
@@ -735,7 +740,7 @@ export function initialize(loggedInUser) {
       const chatHeader = chat_modal.querySelector(".chat_header");
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
-
+      console.log("identifiersfdgsd",identifiers)
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
@@ -1126,17 +1131,19 @@ function createSignupForm() {
 
   // Full name input
   const fullNameInput = createFormInput(
-    "text",
+    "full_name",
     "Enter your full name",
-    "full_name"
+    "text",
+
   );
   form.appendChild(fullNameInput);
 
   // Phone number input
   const phoneInput = createFormInput(
-    "text",
+    "phone",
     "Enter your phone number",
-    "phone"
+    "text",
+    
   );
   form.appendChild(phoneInput);
 
@@ -1185,6 +1192,10 @@ function createSignupForm() {
 
 
   const app_name_ls = localStorage.getItem('tezkit_app_name')
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+  console.log("what is ittezkit_app_data",tezkit_app_data)
+  const tezkit_app_pdata = JSON.parse(tezkit_app_data)
+  console.log("there is thenat",tezkit_app_pdata.tenant_id)
   // Form submission handling
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1194,20 +1205,33 @@ function createSignupForm() {
       email: formData.get("email"),
       phone: formData.get("phone"),
       password: formData.get("password"),
+      type: "user_type",
+      tenant: tezkit_app_pdata.tenant_id,
       gender: formData.get("gender"),
-      type: "user",
-      tenant: "tenant1",
       app_name: app_name_ls,
+      role: 65536
     };
-
+    const api_data = {
+      "type": "user_type",
+      "tenant": "tenant2",
+      "password": "passmenow",
+      "full_name": "rekha singh",
+      "email": "rekha@gmail.com",
+      "phone": "9354026963",
+      "gender": "Male",
+      "app_name": "app1_acm_true_tenant2",
+      "role": 65536
+  }
+    console.log(data,"let see if left it identical to right",api_data, tezkit_app_pdata.auth_key)
     try {
       console.log("is it running??")
       const response = await fetch(
-        "https://js0spkks6a.execute-api.ap-south-1.amazonaws.com/prod/signup",
+        "https://n6s60l8h2a.execute-api.ap-south-1.amazonaws.com/prod/signup",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-API-Key":tezkit_app_pdata.auth_key
           },
           body: JSON.stringify(data),
         }
@@ -1313,7 +1337,7 @@ async function handleLogin(event) {
 
   try {
     const response = await fetch(
-      "https://js0spkks6a.execute-api.ap-south-1.amazonaws.com/prod/login",
+      "https://n6s60l8h2a.execute-api.ap-south-1.amazonaws.com/prod/login",
       {
         method: "POST",
         body: JSON.stringify(data),
@@ -1332,7 +1356,7 @@ async function handleLogin(event) {
 
       console.log("areweherdde?")
       // if (app_name){
-      //   const reqUrl = `https://0o1acxdir1.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
+      //   const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
     
       // const headersList = {
       //     "Accept": "*/*",
