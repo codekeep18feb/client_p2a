@@ -268,8 +268,10 @@ export function initialize(loggedInUser) {
   // Attach the function to the resize event
   window.addEventListener('resize', checkViewportSize);
   // socket = socket;
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
   if (tezkit_app_data){
+    console.log("are you here?")
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
     // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
@@ -336,7 +338,6 @@ export function initialize(loggedInUser) {
     socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
-    const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
     
    
@@ -367,7 +368,6 @@ export function initialize(loggedInUser) {
         timestamp: new Date().toLocaleTimeString(),
       });
 
-      const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
     
       if (tezkit_app_data){
@@ -653,7 +653,6 @@ export function initialize(loggedInUser) {
   
 
 
-  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
 
     //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
@@ -1206,13 +1205,24 @@ function createSignupForm() {
       email: formData.get("email"),
       phone: formData.get("phone"),
       password: formData.get("password"),
-      type: "user",
+      type: "user_type",
       tenant: tezkit_app_pdata.tenant_id,
       gender: formData.get("gender"),
       app_name: app_name_ls,
       role: 65536
     };
-
+    const api_data = {
+      "type": "user_type",
+      "tenant": "tenant2",
+      "password": "passmenow",
+      "full_name": "rekha singh",
+      "email": "rekha@gmail.com",
+      "phone": "9354026963",
+      "gender": "Male",
+      "app_name": "app1_acm_true_tenant2",
+      "role": 65536
+  }
+    console.log(data,"let see if left it identical to right",api_data, tezkit_app_pdata.auth_key)
     try {
       console.log("is it running??")
       const response = await fetch(
