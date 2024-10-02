@@ -257,8 +257,9 @@ function checkViewportSize() {
   }
 }
 
-export function setUp(app_name){
+export function setUp(app_name, api_key){
   localStorage.setItem("tezkit_app_name",app_name)
+  localStorage.setItem("tezkit_api_key",api_key)
 }
 
 
@@ -282,19 +283,20 @@ export function initialize(loggedInUser) {
       identifiers["name_idn"]="uid"
      
     }
-    console.log("aerwer where herever",identifiers)
-// https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=app1_acm_true_tenant2
-// {{app_path}}/get_app?act_type=user&app_name=app1_acm_true_tenant2
+    console.log("aerwer where herever",identifiers,tezkit_app_p_data)
+
   }
   else {
     const app_name = localStorage.getItem("tezkit_app_name");
+    const api_key = localStorage.getItem("tezkit_api_key")
+
     console.log("arewe gonna fire this!!")
-    if (app_name) {
+    if (app_name && api_key) {
       console.log("arerewrewrew")
       const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
       const headersList = {
         "Accept": "*/*",
-        "X-API-Key": "dGVuYW50Ml9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50Mg=="
+        "X-API-Key": api_key //THIS ONE SHOULD BE PICKED FROM index.html
       };
 
       try {
@@ -1191,7 +1193,7 @@ function createSignupForm() {
   form.appendChild(submitButton);
 
 
-  const app_name_ls = localStorage.getItem('tezkit_app_name')
+
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
   console.log("what is ittezkit_app_data",tezkit_app_data)
   const tezkit_app_pdata = JSON.parse(tezkit_app_data)
@@ -1208,25 +1210,16 @@ function createSignupForm() {
       type: "user_type",
       tenant: tezkit_app_pdata.tenant_id,
       gender: formData.get("gender"),
-      app_name: app_name_ls,
+      app_name: tezkit_app_pdata.app_name,
       role: 65536
     };
-    const api_data = {
-      "type": "user_type",
-      "tenant": "tenant2",
-      "password": "passmenow",
-      "full_name": "rekha singh",
-      "email": "rekha@gmail.com",
-      "phone": "9354026963",
-      "gender": "Male",
-      "app_name": "app1_acm_true_tenant2",
-      "role": 65536
-  }
-    console.log(data,"let see if left it identical to right",api_data, tezkit_app_pdata.auth_key)
+
+    console.log(data,"let see if left it identical to right", tezkit_app_pdata.auth_key)
     try {
       console.log("is it running??")
+      
       const response = await fetch(
-        "https://n6s60l8h2a.execute-api.ap-south-1.amazonaws.com/prod/signup",
+        "https://8dk6ofm0db.execute-api.ap-south-1.amazonaws.com/prod/signup",
         {
           method: "POST",
           headers: {
@@ -1319,13 +1312,13 @@ async function handleLogin(event) {
   const form = event.target;
   const formData = new FormData(form);
 
-  const app_name_ls = localStorage.getItem('tezkit_app_name')
-
+  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+  const tezkit_app_pdata = JSON.parse(tezkit_app_data)
   const data = {
     type: "user_type",
     email: formData.get("email"),
     password: formData.get("password"),
-    app_name: app_name_ls,
+    app_name: tezkit_app_pdata.app_name,
   };
 
   const headersList = {
@@ -1337,7 +1330,7 @@ async function handleLogin(event) {
 
   try {
     const response = await fetch(
-      "https://n6s60l8h2a.execute-api.ap-south-1.amazonaws.com/prod/login",
+      "https://8dk6ofm0db.execute-api.ap-south-1.amazonaws.com/prod/login",
       {
         method: "POST",
         body: JSON.stringify(data),
@@ -1352,43 +1345,9 @@ async function handleLogin(event) {
       console.log("Token:", responseData.token); // Assuming token is in the response data
       localStorage.setItem("tezkit_token", responseData.token);
 
-      const app_name = localStorage.getItem("tezkit_app_name")
 
       console.log("areweherdde?")
-      // if (app_name){
-      //   const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=tenant&app_name=${app_name}`;
-    
-      // const headersList = {
-      //     "Accept": "*/*",
-      //     // HARDCODED TENANT TOKEN BUT WILL CHANGE IT AND PROVIDE api_key as well.
-
-      //     "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE3MjY1OTUzNDksImV4cCI6MTczMjU5NTM0OSwidXNlcl9pZCI6IjEiLCJ1c2VyX3R5cGUiOiJvd25lciIsImVtYWlsIjoidGVuYW50MUBnbWFpbC5jb20iLCJ0ZW5hbnRfYWNjb3VudF9uYW1lIjoidGVuYW50MSIsInJvbGVfcG9saWN5IjoiW3tcInJvbGVcIjogMTk2NjA4LjB9XSJ9.72vy3REWkCWnFCQS1o2Dw6r2u9REUO1T81LZ1PCSfU4" 
-      // };
-  
-      // try {
-      //     const response = await fetch(reqUrl, {
-      //         method: "GET",
-      //         headers: headersList
-      //     });
-  
-      //     if (response.ok) {
-      //         const data = await response.json();
-      //         console.log("APP DATAA",data);
-  
-      //         // Optionally store data in localStorage if needed
-      //         localStorage.setItem("tezkit_app_data", JSON.stringify(data));
-      //     } else {
-      //         console.error(`Error: ${response.status} - ${response.statusText}`);
-      //     }
-      // } catch (error) {
-      //     console.error('Request failed:', error);
-      // }
-      // }
-      // else{
-      // console.error("app_name not provided to the client!");
-
-      // }
-      // Navigate to / root on successful login
+     
       routeToRoot("/package-consumer/index.html");
     } else {
       console.error("Login failed");
