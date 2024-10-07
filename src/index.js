@@ -659,13 +659,16 @@ export function initialize(loggedInUser) {
 
     //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
     console.log("here is the fdghfjghjhgfj",tezkit_app_data);
+    console.log("arev here on the first load!",tezkit_app_data)
+
+
+
     
   if (tezkit_app_data){
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
     console.log("here is the tezkit_app_p_data.settings.authCloudManaged",tezkit_app_p_data);
 
     if (tezkit_app_p_data.settings.authCloudManaged){
-
       if (!token) {
         console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
     
@@ -683,6 +686,10 @@ export function initialize(loggedInUser) {
 
 
     }
+  else{
+    renderAuthHeader();
+
+  }
   
 
   console.log("are we here yet!");
