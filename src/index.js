@@ -428,6 +428,11 @@ export function initialize(loggedInUser) {
 
     socket.on('ON_MESSAGE_ARRIVAL', function (data) {
       console.log("Reply Recieved!", data)
+
+      const p_data = JSON.parse(data);
+      console.log("reply msg data", p_data);
+
+      handleReplyMessageEvent(p_data);
     })
 
 
@@ -644,6 +649,62 @@ export function initialize(loggedInUser) {
       if (messageElement) {
         updateMessageReaction(messageElement, reaction);
       }
+    }
+
+
+    function handleReplyMessageEvent(p_data) {
+      console.log("reply datavfjvn:", p_data);
+
+      const { msg_id, message } = p_data;
+      console.log("Extracted msg_id:", msg_id);
+      const replyMsg = message;
+      const chatBody = document.getElementById("chatBody");
+
+      const msgIndex = getMessageIndex(p_data.to_msg.msg_id);
+      console.log("When receiving a reply to message at index:", msgIndex);
+
+      const messageElement = getMessageElement(msgIndex, chatBody);
+      console.log("messageElement", messageElement);
+
+      if (messageElement) {
+        renderReplyMessage(messageElement, replyMsg);
+      }
+    }
+
+    function renderReplyMessage(originalMessageText, replyMsg) {
+      console.log("renderReplyMessage with replyMsg:", replyMsg);
+
+      console.log("originalMessageText:", originalMessageText);
+
+      const chatBody = document.getElementById("chatBody");
+      const replyWrapper = document.createElement("div");
+      replyWrapper.classList.add("message", "admin");
+
+      const replyElement = document.createElement("div");
+      replyElement.classList.add("reply-message");
+
+
+      const originalText = originalMessageText.querySelector("p").textContent;
+      console.log("originalText msg",originalText)
+
+      const replyText = replyMsg;
+
+      console.log("replyText msg",replyText)
+      const replyTime = replyMsg.timestamp|| new Date().toLocaleTimeString(); 
+
+      replyElement.innerHTML = `
+        <div class="original-message">
+          <p>${originalText}</p>
+        </div>
+        <div class="reply-content">
+          <p>${replyText}</p>
+          <span class="time">${replyTime}</span>
+        </div>
+      `;
+
+      console.log("reply message with original message", replyElement);
+      replyWrapper.appendChild(replyElement);
+      chatBody.appendChild(replyWrapper);
     }
 
 

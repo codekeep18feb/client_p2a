@@ -267,7 +267,15 @@ html {
 #chat_modal_opener {
   animation: zoom 2s infinite ease-in-out;
 }
-
+.original-message {
+  background-color: rgb(160, 79, 227);
+  border-left: 5px solid rgb(200, 135, 254);
+  border-radius: 5px;
+  padding: 8px;
+  }
+  .reply-content {
+  padding: 0;
+  }
 
 
 
