@@ -21,8 +21,8 @@ export { chat_modal_open };
 
 function incrementNotificationsCount() {
   const notification_num_div = document.getElementById("notification_num");
-      notification_num_div.textContent =
-        Number(notification_num_div.textContent) + 1;
+  notification_num_div.textContent =
+    Number(notification_num_div.textContent) + 1;
 }
 
 
@@ -124,7 +124,9 @@ export function renderCustomizeComponent() {
 
 let socket;
 
+
 function addNewElementToChatBody(obj) {
+  console.log("objbdb", obj)
   const new_messageElement = document.createElement("div");
   new_messageElement.classList.add("message");
   new_messageElement.classList.add("admin");
@@ -135,14 +137,19 @@ function addNewElementToChatBody(obj) {
         </div>
     `;
   chatBody.appendChild(new_messageElement);
+
+  const originalMessageText = obj.msg;
+  return originalMessageText
 }
 
 export function renderAuthHeader(token) {
+  console.log("mark1 here")
   const header = document.createElement("header");
   header.classList.add("header");
 
   const leftPart = document.createElement("div");
   leftPart.classList.add("left");
+  console.log("mark2 here")
 
   // Create an img element for the logo
   const logo = document.createElement("img");
@@ -162,6 +169,7 @@ export function renderAuthHeader(token) {
 
   const rightPart = document.createElement("div");
   rightPart.classList.add("right");
+  console.log("mark3 here")
 
   const notificationIcon = document.createElement("span");
   notificationIcon.textContent = "🔔";
@@ -187,7 +195,7 @@ export function renderAuthHeader(token) {
   // const token = localStorage.getItem("tezkit_token");
 
   header.appendChild(rightPart);
-
+  console.log("header should be added by now!")
   document.body.prepend(header);
 
   if (token) {
@@ -206,13 +214,13 @@ export function renderAuthHeader(token) {
     // chatIcon.addEventListener('click', toggleChatModal);
     // rightPart.appendChild(chatIcon);
 
-   
+
   } else {
     const loginButton = createButtonComp("Login", () => {
       routeToLogin();
     });
     rightPart.appendChild(loginButton);
-
+    first
     const signupButton = createButtonComp("Signup", () => {
       toggleSignup();
     });
@@ -257,9 +265,9 @@ function checkViewportSize() {
   }
 }
 
-export function setUp(app_name, api_key){
-  localStorage.setItem("tezkit_app_name",app_name)
-  localStorage.setItem("tezkit_api_key",api_key)
+export function setUp(app_name, api_key) {
+  localStorage.setItem("tezkit_app_name", app_name)
+  localStorage.setItem("tezkit_api_key", api_key)
 }
 
 
@@ -271,19 +279,19 @@ export function initialize(loggedInUser) {
   // socket = socket;
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
-  if (tezkit_app_data){
+  if (tezkit_app_data) {
     console.log("are you here?")
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
     // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
-    if (tezkit_app_p_data.settings.authCloudManaged){
-      identifiers["name_idn"]="id"
+    if (tezkit_app_p_data.settings.authCloudManaged) {
+      identifiers["name_idn"] = "id"
     }
-    else if(tezkit_app_p_data.settings.authCloudManaged===false){
-      identifiers["name_idn"]="uid"
-     
+    else if (tezkit_app_p_data.settings.authCloudManaged === false) {
+      identifiers["name_idn"] = "uid"
+
     }
-    console.log("aerwer where herever",identifiers,tezkit_app_p_data)
+    console.log("aerwer where herever", identifiers, tezkit_app_p_data)
 
   }
   else {
@@ -323,31 +331,31 @@ export function initialize(loggedInUser) {
       } catch (error) {
         console.error('Request failed:', error);
       }
-      
-      
-      
+
+
+
     } else {
       console.error("app_name not provided to the client!");
     }
-  
-  
+
+
   }
 
   if (loggedInUser) {
-    console.log("loggedInUserasdfasd",loggedInUser)
+    console.log("loggedInUserasdfasd", loggedInUser)
     // const io = await require('socket.io-client') // For client-side connection
 
-    socket = io("http://122.160.157.99:8022");
+    socket = io("http://122.160.157.99:8001");
     console.log("loggedInUser in initialze??");
 
 
-    
-   
+
+
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
 
-    console.log(loggedInUser,identifiers,"user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+    console.log(loggedInUser, identifiers, "user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
 
     socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
@@ -371,16 +379,16 @@ export function initialize(loggedInUser) {
       });
 
 
-    
-      if (tezkit_app_data){
+
+      if (tezkit_app_data) {
         const tezkit_app_p_data = JSON.parse(tezkit_app_data)
         // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
-        if (tezkit_app_p_data.settings.authCloudManaged){
+        if (tezkit_app_p_data.settings.authCloudManaged) {
           incrementNotificationsCount()
 
         }
-       
+
       }
 
 
@@ -428,6 +436,13 @@ export function initialize(loggedInUser) {
 
     socket.on('ON_MESSAGE_ARRIVAL', function (data) {
       console.log("Reply Recieved!", data)
+
+      const p_data = JSON.parse(data);
+      console.log("reply msg data", p_data);
+
+      handleReplyMessageEvent(p_data);
+
+
     })
 
 
@@ -511,77 +526,8 @@ export function initialize(loggedInUser) {
     });
 
 
-
-    // socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-    //   const p_data = JSON.parse(data);
-    //   console.log("arew we getting this now?", p_data);
-
-    //   if (!p_data.message.action) {
-    //     console.error("No action provided!");
-    //   } else {
-    //     console.log("hwere i am  let's go champ!!!!!");
-    //     if (p_data.message.action == "MSG_UPDATED_EVENT") {
-    //       console.log("do we get it the when message is seen???", p_data);
-    //       console.log(
-    //         p_data.message.message,
-    //         "FIND status in message? IT SEEMS WE GOT SOME STATUS UPDATE ON MSGS.  @Admin.. lets get msg_id",
-    //         data,
-    //         typeof data
-    //       );
-
-    //       // message =
-    //       const msg = p_data.message.message;
-    //       const msg_id = p_data.message.msg_id;
-    //       console.log(msg_id, "what is this msg", msg);
-
-    //       console.log("my messg id",msg_id );
-
-    //       // a = "msg_id__1"
-    //       // 'msg_id__1'
-    //       const msg_calc_ind = msg_id.split("msg_id__")[1];
-
-    //       // ind = a.split('msg_id__')[1]
-    //       // '1'
-    //       // document.getElementById('chat_modal')
-
-    //       // First, grab the parent element with id 'chatBody'
-    //       const chatBody = document.getElementById("chatBody");
-
-    //       // Get all <p> elements within .message.admin divs
-    //       const messageElements = chatBody.querySelectorAll(".message.admin p");
-
-    //       // Now, access the nth message (where n is the index, starting from 0)
-    //       // const msg_calc_ind = 2; // For example, this will give you the 3rd message (index 2)
-    //       if (msg_calc_ind - 1 < messageElements.length) {
-    //         const nthMessage = messageElements[msg_calc_ind - 1];
-    //         console.log("nthMessageText", nthMessage);
-    //         nthMessage.textContent = msg;
-    //       } else {
-    //         console.error("No message found at this index. to be updated");
-    //       }
-
-    //       // Finally, get the text content of the <p> tag
-
-    //       // console.log(messageText); // Output: "the message"
-
-    //       // updateMsg(p_data.message.msg_id, msg);
-    //     }
-
-
-    //     if (p_data.message.action == "MSG_REACTION_EVENT") {
-    //       console.log("reaction received!!!",p_data);
-    //     } else {
-    //       console.error("Action Not Yet Handled!");
-    //     }
-    //   }
-
-    //   // Let's make the msgs all READ
-    // });  
-
-
-    // Function to extract message index from msg_id
-
     function getMessageIndex(msg_id) {
+      console.log("msg_iddf", msg_id)
       const msg_calc_ind = msg_id.split("msg_id__")[1];
       return parseInt(msg_calc_ind, 10) - 1;
     }
@@ -589,6 +535,7 @@ export function initialize(loggedInUser) {
     // Function to get a specific message element by index
     function getMessageElement(index, chatBody) {
       const messageElements = chatBody.querySelectorAll(".message");
+      console.log("it is msg container", messageElements)
       if (index < messageElements.length) {
         return messageElements[index];
       } else {
@@ -599,6 +546,7 @@ export function initialize(loggedInUser) {
 
     function updateMessageText(messageElement, newText) {
       const messageText = messageElement.querySelector("p");
+      console.log("what is in the messageText", messageText)
       if (messageText) {
         messageText.textContent = newText;
         console.log("Message updated to:", newText);
@@ -609,6 +557,8 @@ export function initialize(loggedInUser) {
 
     // Function to update the reaction
     function updateMessageReaction(messageElement, reaction) {
+      console.log("what is inside the messageElement", messageElement)
+      console.log("what is inside the reaction", reaction)
       let reactionElement = messageElement.querySelector(".reaction");
       if (!reactionElement) {
         reactionElement = document.createElement("div");
@@ -619,18 +569,19 @@ export function initialize(loggedInUser) {
       console.log("Reaction updated to:", reaction);
     }
 
-    function handleMsgUpdatedEvent(p_data) {
-      const { msg_id, message } = p_data.message;
-      const msg = message;
-      const chatBody = document.getElementById("chatBody");
+    // function handleMsgUpdatedEvent(p_data) {
+    //   const { msg_id, message } = p_data.message;
+    //   const msg = message;
+    //   const chatBody = document.getElementById("chatBody");
 
-      const msgIndex = getMessageIndex(msg_id);
-      const messageElement = getMessageElement(msgIndex, chatBody);
+    //   const msgIndex = getMessageIndex(msg_id);
+    //   const messageElement = getMessageElement(msgIndex, chatBody);
 
-      if (messageElement) {
-        updateMessageText(messageElement, msg);
-      }
-    }
+    //   if (messageElement) {
+    //     console.log("what is inside of the messageElement", messageElement)
+    //     updateMessageText(messageElement, msg);
+    //   }
+    // }
 
 
     function handleMsgReactionEvent(p_data) {
@@ -639,7 +590,9 @@ export function initialize(loggedInUser) {
       const chatBody = document.getElementById("chatBody");
 
       const msgIndex = getMessageIndex(msg_id);
+      console.log("when admin react on consurmer msg ", msgIndex)
       const messageElement = getMessageElement(msgIndex, chatBody);
+      console.log("messageElement", messageElement)
 
       if (messageElement) {
         updateMessageReaction(messageElement, reaction);
@@ -647,43 +600,105 @@ export function initialize(loggedInUser) {
     }
 
 
+    function handleReplyMessageEvent(p_data) {
+      console.log("reply datavfjvn:", p_data);
+
+      const { msg_id, message } = p_data;
+      console.log("Extracted msg_id:", msg_id);
+      const replyMsg = message;
+      const chatBody = document.getElementById("chatBody");
+
+      const msgIndex = getMessageIndex(p_data.to_msg.msg_id);
+      console.log("When receiving a reply to message at index:", msgIndex);
+
+      const messageElement = getMessageElement(msgIndex, chatBody);
+      console.log("messageElement", messageElement);
+
+      if (messageElement) {
+        renderReplyMessage(messageElement, replyMsg);
+      }
+    }
+
+    function renderReplyMessage(originalMessageText, replyMsg) {
+      console.log("renderReplyMessage with replyMsg:", replyMsg);
+
+      console.log("originalMessageText:", originalMessageText);
+
+      const chatBody = document.getElementById("chatBody");
+      const replyWrapper = document.createElement("div");
+      replyWrapper.classList.add("message", "admin");
+
+      const replyElement = document.createElement("div");
+      replyElement.classList.add("reply-message");
+
+
+      const originalText = originalMessageText.querySelector("p").textContent;
+      console.log("originalText msg",originalText)
+
+      const replyText = replyMsg;
+
+      console.log("replyText msg",replyText)
+      const replyTime = replyMsg.timestamp|| new Date().toLocaleTimeString(); 
+
+      replyElement.innerHTML = `
+        <div class="original-message">
+          <p>${originalText}</p>
+        </div>
+        <div class="reply-content">
+          <p>${replyText}</p>
+          <span class="time">${replyTime}</span>
+        </div>
+      `;
+
+      console.log("reply message with original message", replyElement);
+      replyWrapper.appendChild(replyElement);
+      chatBody.appendChild(replyWrapper);
+    }
+
+
+
+    
+
+
+
 
 
   }
 
   const token = localStorage.getItem("tezkit_token");
-  
+  console.log("fhdhd", token)
 
 
 
 
-    //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    console.log("here is the fdghfjghjhgfj",tezkit_app_data);
-    
-  if (tezkit_app_data){
+
+  //   const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+  console.log("here is the fdghfjghjhgfj", tezkit_app_data);
+
+  if (tezkit_app_data) {
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    console.log("here is the tezkit_app_p_data.settings.authCloudManaged",tezkit_app_p_data);
+    console.log("here is the tezkit_app_p_data.settings.authCloudManaged", tezkit_app_p_data.settings.authCloudManaged);
 
-    if (tezkit_app_p_data.settings.authCloudManaged){
+    if (tezkit_app_p_data.settings.authCloudManaged) {
 
       if (!token) {
         console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
-    
+        //logout header
         renderAuthHeader();
       } else {
-    
+        //login header
         renderAuthHeader(token);
-    
+
         // rightPart.appendChild(makeCompButton);
       }
-    
-
-    }
-
 
 
     }
-  
+
+
+
+  }
+
 
   console.log("are we here yet!");
 
@@ -696,7 +711,7 @@ export function initialize(loggedInUser) {
   const modal = document.createElement("div");
   modal.classList.add("modal");
   modal.id = "notificationModal";
-  modal.textContent = "This is the notification modal";
+  // modal.textContent = "This is the notification modal";
   document.body.appendChild(modal);
 
   const chat_modal = document.createElement("div");
@@ -742,7 +757,7 @@ export function initialize(loggedInUser) {
       const chatHeader = chat_modal.querySelector(".chat_header");
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
-      console.log("identifiersfdgsd",identifiers)
+      console.log("identifiersfdgsd", identifiers)
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
@@ -755,7 +770,7 @@ export function initialize(loggedInUser) {
   }
 
   function closeModal() {
-    console.log("you click on close btn",chat_modal_open);
+    console.log("you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
     toggleChatModal()
@@ -776,7 +791,7 @@ export function initialize(loggedInUser) {
   </div>
   <div class="chat_footer">
       <input type="text" id="chatInput" placeholder="Type here...">
-      <button id="sendButton">Send</button>
+      <button class="chat_button" id="sendButton">Send</button>
   </div>
 `;
 
@@ -897,13 +912,15 @@ export function initialize(loggedInUser) {
   //   // other messages
   // ];
 
+
+
   function renderReaction(reaction) {
     if (!reaction) return "";
-
+    console.log("reactionfnvn", reaction)
     return `<div class="reaction">${reaction}</div>`;
   }
 
-
+  // renderMessage is when consumer send msg to admin
   function renderMessage(newMessage, type = 'REGULAR') {
     if (newMessage) {
       if (type === 'REGULAR') {
@@ -1025,6 +1042,7 @@ export function initialize(loggedInUser) {
   document.body.appendChild(chat_modal);
 }
 
+
 function createButtonComp(text, onClick) {
   const button = document.createElement("button");
   button.textContent = text;
@@ -1145,7 +1163,7 @@ function createSignupForm() {
     "phone",
     "Enter your phone number",
     "text",
-    
+
   );
   form.appendChild(phoneInput);
 
@@ -1195,9 +1213,9 @@ function createSignupForm() {
 
 
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-  console.log("what is ittezkit_app_data",tezkit_app_data)
+  console.log("what is ittezkit_app_data", tezkit_app_data)
   const tezkit_app_pdata = JSON.parse(tezkit_app_data)
-  console.log("there is thenat",tezkit_app_pdata.tenant_id)
+  console.log("there is thenat", tezkit_app_pdata.tenant_id)
   // Form submission handling
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1214,17 +1232,17 @@ function createSignupForm() {
       role: 65536
     };
 
-    console.log(data,"let see if left it identical to right", tezkit_app_pdata.auth_key)
+    console.log(data, "let see if left it identical to right", tezkit_app_pdata.auth_key)
     try {
       console.log("is it running??")
-      
+
       const response = await fetch(
         "https://8dk6ofm0db.execute-api.ap-south-1.amazonaws.com/prod/signup",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-Key":tezkit_app_pdata.auth_key
+            "X-API-Key": tezkit_app_pdata.auth_key
           },
           body: JSON.stringify(data),
         }
@@ -1347,7 +1365,7 @@ async function handleLogin(event) {
 
 
       console.log("areweherdde?")
-     
+
       routeToRoot("/package-consumer/index.html");
     } else {
       console.error("Login failed");
@@ -1382,6 +1400,10 @@ function routeToRoot(path = null) {
 
 // Attach the login form submit event handler to the login form
 document.addEventListener("DOMContentLoaded", () => {
+
+
+
+
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", handleLogin);
