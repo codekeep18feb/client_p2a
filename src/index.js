@@ -25,7 +25,7 @@ function incrementNotificationsCount() {
     Number(notification_num_div.textContent) + 1;
 }
 
-function getMessageIndex(msg_id) {
+export function getMessageIndex(msg_id) {
   const msg_calc_ind = msg_id.split("msg_id__")[1];
   return parseInt(msg_calc_ind, 10) - 1;
 }
