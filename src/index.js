@@ -21,8 +21,8 @@ export { chat_modal_open };
 
 function incrementNotificationsCount() {
   const notification_num_div = document.getElementById("notification_num");
-      notification_num_div.textContent =
-        Number(notification_num_div.textContent) + 1;
+  notification_num_div.textContent =
+    Number(notification_num_div.textContent) + 1;
 }
 
 
@@ -206,7 +206,7 @@ export function renderAuthHeader(token) {
     // chatIcon.addEventListener('click', toggleChatModal);
     // rightPart.appendChild(chatIcon);
 
-   
+
   } else {
     const loginButton = createButtonComp("Login", () => {
       routeToLogin();
@@ -257,11 +257,35 @@ function checkViewportSize() {
   }
 }
 
-export function setUp(app_name, api_key){
-  localStorage.setItem("tezkit_app_name",app_name)
-  localStorage.setItem("tezkit_api_key",api_key)
+export function setUp(app_name, api_key) {
+  localStorage.setItem("tezkit_app_name", app_name)
+  localStorage.setItem("tezkit_api_key", api_key)
 }
 
+
+function updateNotificationBell(tezkit_app_data) {
+  if (tezkit_app_data){
+  const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+  // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
+  
+  if (tezkit_app_p_data.settings.authCloudManaged){
+  incrementNotificationsCount()
+  
+  }
+  }
+  }
+  
+  function informPeerSysAboutMsgStatus(socket, assigned_msg_id) {
+  socket.emit("ON_MESSAGE_STATUS_CHANGED", {
+  action: "MSG_STATUS_CHANGE_EVENT",
+  msg_id: assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
+  room: "global_for__1",
+  message: "READ",
+  timestamp: new Date().toLocaleTimeString(),
+  });
+  }
+
+  
 
 // Function to add a full-width header with a fixed height and red background color
 export function initialize(loggedInUser) {
@@ -271,19 +295,19 @@ export function initialize(loggedInUser) {
   // socket = socket;
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
-  if (tezkit_app_data){
+  if (tezkit_app_data) {
     console.log("are you here?")
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
     // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
-    if (tezkit_app_p_data.settings.authCloudManaged){
-      identifiers["name_idn"]="id"
+    if (tezkit_app_p_data.settings.authCloudManaged) {
+      identifiers["name_idn"] = "id"
     }
-    else if(tezkit_app_p_data.settings.authCloudManaged===false){
-      identifiers["name_idn"]="uid"
-     
+    else if (tezkit_app_p_data.settings.authCloudManaged === false) {
+      identifiers["name_idn"] = "uid"
+
     }
-    console.log("aerwer where herever",identifiers,tezkit_app_p_data)
+    console.log("aerwer where herever", identifiers, tezkit_app_p_data)
 
   }
   else {
@@ -323,31 +347,31 @@ export function initialize(loggedInUser) {
       } catch (error) {
         console.error('Request failed:', error);
       }
-      
-      
-      
+
+
+
     } else {
       console.error("app_name not provided to the client!");
     }
-  
-  
+
+
   }
 
   if (loggedInUser) {
-    console.log("loggedInUserasdfasd",loggedInUser)
+    console.log("loggedInUserasdfasd", loggedInUser)
     // const io = await require('socket.io-client') // For client-side connection
 
     socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
 
-    
-   
+
+
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
 
-    console.log(loggedInUser,identifiers,"user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+    console.log(loggedInUser, identifiers, "user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
 
     socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
@@ -356,6 +380,7 @@ export function initialize(loggedInUser) {
 
     // console.log('joined room :: ',"global_for__" + loggedInUser[identifiers["name_idn"]])
     // socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
+
 
     socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
       console.log("isndie readl one", data)
@@ -370,45 +395,18 @@ export function initialize(loggedInUser) {
         timestamp: new Date().toLocaleTimeString(),
       });
 
-
-    
-      if (tezkit_app_data){
-        const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-        // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
-
-        if (tezkit_app_p_data.settings.authCloudManaged){
-          incrementNotificationsCount()
-
-        }
-       
-      }
-
+      // update notifications bell
+      updateNotificationBell(tezkit_app_data)
 
       // const sd = JSON.parse(data)
       const msg = p_data["message"]["message"];
       const timestamp = p_data["message"]["timestamp"];
 
-      // const chat_window = document.getElementById('chatBody')
-      // const new_msg_div = document.createElement('div')
-      // new_msg_div.textContent = 'new msg'
-      // chat_window.appendChild(new_msg_div)
-
-      console.log(
-        "pdata do we have some msg_id?",
-        p_data.message.assigned_msg_id
-      );
-
-      const chat_modal = document.getElementById("chatModal");
-      console.log("whatewe sdfsdf", chat_modal.style.display)
       if (chat_modal_open) {
+        console.log("is there anything yet stored in the global_bucket", global_bucket)
+
         addNewElementToChatBody({ msg, timestamp });
-        socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-          action: "MSG_STATUS_CHANGE_EVENT",
-          msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-          room: "global_for__1",
-          message: "READ",
-          timestamp: new Date().toLocaleTimeString(),
-        });
+        informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
       } else {
         console.log("arewe atleasthere", global_bucket)
         global_bucket.unread_msgs.push({
@@ -416,15 +414,9 @@ export function initialize(loggedInUser) {
           timestamp,
           assigned_msg_id: p_data.message.assigned_msg_id,
         });
-        socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-          action: "MSG_STATUS_CHANGE_EVENT",
-          msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-          room: "global_for__1",
-          message: "DELIVERED",
-          timestamp: new Date().toLocaleTimeString(),
-        });
       }
     });
+
 
     socket.on('ON_MESSAGE_ARRIVAL', function (data) {
       console.log("Reply Recieved!", data)
@@ -685,12 +677,12 @@ export function initialize(loggedInUser) {
 
 
       const originalText = originalMessageText.querySelector("p").textContent;
-      console.log("originalText msg",originalText)
+      console.log("originalText msg", originalText)
 
       const replyText = replyMsg;
 
-      console.log("replyText msg",replyText)
-      const replyTime = replyMsg.timestamp|| new Date().toLocaleTimeString(); 
+      console.log("replyText msg", replyText)
+      const replyTime = replyMsg.timestamp || new Date().toLocaleTimeString();
 
       replyElement.innerHTML = `
         <div class="original-message">
@@ -714,33 +706,33 @@ export function initialize(loggedInUser) {
 
   const token = localStorage.getItem("tezkit_token");
 
-  if (tezkit_app_data){
+  if (tezkit_app_data) {
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    console.log("here is the tezkit_app_p_data.settings.authCloudManaged",tezkit_app_p_data);
+    console.log("here is the tezkit_app_p_data.settings.authCloudManaged", tezkit_app_p_data);
 
-    if (tezkit_app_p_data.settings.authCloudManaged){
+    if (tezkit_app_p_data.settings.authCloudManaged) {
       if (!token) {
         console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
-    
+
         renderAuthHeader();
       } else {
-    
+
         renderAuthHeader(token);
-    
+
         // rightPart.appendChild(makeCompButton);
       }
-    
-
-    }
-
 
 
     }
-  else{
+
+
+
+  }
+  else {
     renderAuthHeader();
 
   }
-  
+
 
   console.log("are we here yet!");
 
@@ -799,7 +791,7 @@ export function initialize(loggedInUser) {
       const chatHeader = chat_modal.querySelector(".chat_header");
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
-      console.log("identifiersfdgsd",identifiers)
+      console.log("identifiersfdgsd", identifiers)
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
@@ -812,7 +804,7 @@ export function initialize(loggedInUser) {
   }
 
   function closeModal() {
-    console.log("you click on close btn",chat_modal_open);
+    console.log("you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
     toggleChatModal()
@@ -843,28 +835,6 @@ export function initialize(loggedInUser) {
     "and if modal is open if logged into chat lets update the username on the chat header??"
   );
 
-  const closebtn = document.getElementById("close-btn");
-  closebtn.addEventListener("clickwheredoyouseethis", function () {
-    toggleChatModal();
-    chat_modal_opener.style.display = "block";
-
-    // const width = window.innerWidth;
-    // const height = window.innerHeight;
-
-    // // Log the dimensions to the console
-    // console.log(`Widtsdfsdh: ${width}px, Height: ${height}px`);
-
-    // if (width < 800) {
-    //   console.log("areraewr dcp,dog dfsd")
-    //   chat_modal.style.display = "flex";
-
-    // }
-    // else {
-    //   console.log("else block is executing???", width)
-    //   chat_modal.style.display = "block";
-
-    // }
-  });
 
   // // Create an img element for the logo
   const chat_modal_container = document.createElement("div");
@@ -885,31 +855,32 @@ export function initialize(loggedInUser) {
   chat_modal_opener.style.color = "#fff";
   chat_modal_opener.style.fontSize = "24px";
 
-  // const chat_modal_opener = document.createElement('img');
-  // chat_modal_opener.setAttribute('id', 'chat_modal_opener')
-  // chat_modal_opener.src = chatNowImage;
-  // chat_modal_opener.alt = 'chatNowImage Logo';
-  // chat_modal_opener.style.display = 'none'; // Adjust the height as needed
-  // chat_modal_opener.style.height = '50px'; // Adjust the height as needed
-  // chat_modal_opener.style.marginRight = '10px'; // Optional: Add some space between the logo and text
+
 
   chat_modal_opener.addEventListener("click", function () {
+    // const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+
+    console.log(tezkit_app_data, "here is bucket's data",global_bucket)
+
+    if (global_bucket){
+      // const p_data = global_bucket.unread_msgs[0]
+
+      global_bucket.unread_msgs.forEach(p_data => {
+        updateNotificationBell(tezkit_app_data)
+        const msg = p_data["msg"]
+        const timestamp = p_data["timestamp"];
+        const assigned_msg_id = p_data["assigned_msg_id"]
+    
+        addNewElementToChatBody({ msg, timestamp });
+        informPeerSysAboutMsgStatus(socket, assigned_msg_id)
+      });
+      global_bucket.unread_msgs = []
+     
+    }
+
+    
     toggleChatModal();
-    // DONOT DELETE ......WILL USE BELOW CODE LATER
-    // if (global_bucket && global_bucket.unread_msgs) {
-    //   console.log("arew westill goin in htere?");
-    //   global_bucket.unread_msgs.forEach(function (obj, index) {
-    //     addNewElementToChatBody({ msg: obj.msg, timestamp: obj.timestamp });
-    //     socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-    //       action: "MSG_STATUS_CHANGE_EVENT",
-    //       msg_id: obj.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-    //       room: "global_for__1",
-    //       message: "READ",
-    //       timestamp: new Date().toLocaleTimeString(),
-    //     });
-    //   });
-    //   global_bucket.unread_msgs = [];
-    // }
+
   });
 
   chat_modal_container.appendChild(chat_modal_opener);
@@ -921,38 +892,12 @@ export function initialize(loggedInUser) {
   const chatInput = document.getElementById("chatInput");
   const sendButton = document.getElementById("sendButton");
 
-  // sendButton.addEventListener('click',()=>{
-  // let new_rply_msg_obj = {
-  //     // "type": "reply",
-  //     'room': "global_for__1",
-  //     "message": "inputBox.value",
-  //     "timestamp": new Date().toLocaleTimeString(),
-  //     "frm_user": {
-  //         "id": loggedInUser[identifiers["name_idn"]],
-  //         "user": loggedInUser.full_name
-  //     },
-  //     "to_user": {
-  //         "id": 1,
-  //         "user": "Admin"
-  //     }
 
-  // }
-
-  // socket.emit('ON_MESSAGE_ARRIVAL_BOT', new_rply_msg_obj);
-
-  // })
 
   // Example of history messages
-  const messages = [
-    // { text: 'Lorem Ipsum is simply dummy textting industry. Lorem Ipsum has been the industry', sender: 'admin', time: '10:10 AM' },
-    // { text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry', sender: 'admin', time: '10:10 AM' },
-    // { text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry', sender: 'user', time: '11:15 AM' }
-  ];
+  const messages = [];
 
-  // const messages = [
-  //   { id: 'msg_id__1', text: 'Hello', time: '15:48:54', reaction: '' },
-  //   // other messages
-  // ];
+
 
   function renderReaction(reaction) {
     if (!reaction) return "";
@@ -1202,7 +1147,7 @@ function createSignupForm() {
     "phone",
     "Enter your phone number",
     "text",
-    
+
   );
   form.appendChild(phoneInput);
 
@@ -1252,9 +1197,9 @@ function createSignupForm() {
 
 
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-  console.log("what is ittezkit_app_data",tezkit_app_data)
+  console.log("what is ittezkit_app_data", tezkit_app_data)
   const tezkit_app_pdata = JSON.parse(tezkit_app_data)
-  console.log("there is thenat",tezkit_app_pdata.tenant_id)
+  console.log("there is thenat", tezkit_app_pdata.tenant_id)
   // Form submission handling
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1271,17 +1216,17 @@ function createSignupForm() {
       role: 65536
     };
 
-    console.log(data,"let see if left it identical to right", tezkit_app_pdata.auth_key)
+    console.log(data, "let see if left it identical to right", tezkit_app_pdata.auth_key)
     try {
       console.log("is it running??")
-      
+
       const response = await fetch(
         "https://8dk6ofm0db.execute-api.ap-south-1.amazonaws.com/prod/signup",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-Key":tezkit_app_pdata.auth_key
+            "X-API-Key": tezkit_app_pdata.auth_key
           },
           body: JSON.stringify(data),
         }
@@ -1404,7 +1349,7 @@ async function handleLogin(event) {
 
 
       console.log("areweherdde?")
-     
+
       routeToRoot("/package-consumer/index.html");
     } else {
       console.error("Login failed");
