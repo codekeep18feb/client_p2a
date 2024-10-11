@@ -751,8 +751,8 @@ export function initialize(loggedInUser) {
   const modal = document.createElement("div");
   modal.classList.add("modal");
   modal.id = "notificationModal";
-  modal.textContent = "This is the notification modal";
-  document.body.appendChild(modal);
+  // modal.textContent = "This is the notification modal";
+  // document.body.appendChild(modal);
 
   const chat_modal = document.createElement("div");
   chat_modal.classList.add("chat_modal");
@@ -1113,6 +1113,7 @@ function toggleNotificationModal() {
   const modal = document.getElementById("notificationModal");
   if (modal.style.display === "none" || modal.style.display === "") {
     modal.style.display = "block";
+    //HERE WE PROBABLY SHOULD LIST OUT ALL THE NOTIFICATIONS IN DECENDING ORDER (ARRIVAL)
   } else {
     modal.style.display = "none";
   }
