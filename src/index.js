@@ -25,7 +25,7 @@ function incrementNotificationsCount() {
     Number(notification_num_div.textContent) + 1;
 }
 
-function getMessageIndex(msg_id) {
+export function getMessageIndex(msg_id) {
   const msg_calc_ind = msg_id.split("msg_id__")[1];
   return parseInt(msg_calc_ind, 10) - 1;
 }
@@ -291,7 +291,20 @@ export function renderAuthHeader(token) {
   }
 }
 
+export function handleMsgUpdatedEvent(p_data) {
+  console.log("dont tell me it was through thisfsdf?")
 
+  const { msg_id, message } = p_data.message;
+  const msg = message;
+  const chatBody = document.getElementById("chatBody");
+
+  const msgIndex = getMessageIndex(msg_id);
+  const messageElement = getMessageElement(msgIndex, chatBody);
+
+  if (messageElement) {
+    updateMessageText(messageElement, msg);
+  }
+}
 
 // Define your breakpoints
 const MOBILE_WIDTH = 768;
@@ -577,6 +590,7 @@ export function initialize(loggedInUser) {
 
         // Main socket event handler
         socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
+          console.log("wathier is it",data)
           const p_data = JSON.parse(data);
           console.log("Received status change:", p_data);
 
@@ -663,24 +677,13 @@ export function initialize(loggedInUser) {
       console.log("Reaction updated to:", reaction);
     }
 
-    function handleMsgUpdatedEvent(p_data) {
-      const { msg_id, message } = p_data.message;
-      const msg = message;
-      const chatBody = document.getElementById("chatBody");
-
-      const msgIndex = getMessageIndex(msg_id);
-      const messageElement = getMessageElement(msgIndex, chatBody);
-
-      if (messageElement) {
-        updateMessageText(messageElement, msg);
-      }
-    }
 
 
     function handleMsgReactionEvent(p_data) {
       const { msg_id, message } = p_data.message;
       const reaction = message;
       const chatBody = document.getElementById("chatBody");
+      console.log("dont tell me it was through this?")
 
       const msgIndex = getMessageIndex(msg_id);
       const messageElement = getMessageElement(msgIndex, chatBody);
