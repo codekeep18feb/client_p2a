@@ -329,9 +329,21 @@ function checkViewportSize() {
 }
 
 export function setUp(app_name, api_key) {
-  localStorage.setItem("tezkit_app_name", app_name)
-  localStorage.setItem("tezkit_api_key", api_key)
+  try {
+    if (!app_name || !api_key) {
+      throw new Error("App name or API key is missing.");
+    }
+    localStorage.setItem("tezkit_app_name", app_name);
+    localStorage.setItem("tezkit_api_key", api_key);
+    initialize()
+
+  } catch (error) {
+    console.error("Failed to set up localStorage:", error.message);
+    renderErrorPopup([error.message])
+    // Additional error handling logic (e.g., notify user)
+  }
 }
+
 
 
 function updateNotificationBell(tezkit_app_data) {
@@ -356,7 +368,7 @@ function informPeerSysAboutMsgStatus(socket, assigned_msg_id) {
   });
 }
 
-function renderErrorPopup() {
+function renderErrorPopup(err_msgs) {
   // Create the error popup container
   const errorPopup = document.createElement("div");
   errorPopup.style.position = "fixed";
@@ -380,33 +392,39 @@ function renderErrorPopup() {
   const errorList = document.createElement("ul");
 
   // Assume `data.errors` contains the list of errors (adjust accordingly)
-  ["ERR1", "ERR2"].forEach((error) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = error;
-    errorList.appendChild(listItem);
-  });
-
-  errorPopup.appendChild(errorList);
-
-  // Append close button
-  const closeButton = document.createElement("button");
-  closeButton.textContent = "Close";
-  closeButton.style.marginTop = "10px";
-  closeButton.style.backgroundColor = "#ff1a1a";
-  closeButton.style.color = "#fff";
-  closeButton.style.border = "none";
-  closeButton.style.padding = "5px 10px";
-  closeButton.style.cursor = "pointer";
-  closeButton.style.borderRadius = "3px";
-
-  closeButton.addEventListener("click", () => {
-    errorPopup.remove();
-  });
-
-  errorPopup.appendChild(closeButton);
-
-  // Prepend the error popup to the document body
-  document.body.prepend(errorPopup);
+  if (err_msgs){
+    err_msgs.forEach((error) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = error;
+      errorList.appendChild(listItem);
+    });
+  
+    errorPopup.appendChild(errorList);
+  
+    // Append close button
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Close";
+    closeButton.style.marginTop = "10px";
+    closeButton.style.backgroundColor = "#ff1a1a";
+    closeButton.style.color = "#fff";
+    closeButton.style.border = "none";
+    closeButton.style.padding = "5px 10px";
+    closeButton.style.cursor = "pointer";
+    closeButton.style.borderRadius = "3px";
+  
+    closeButton.addEventListener("click", () => {
+      errorPopup.remove();
+    });
+  
+    errorPopup.appendChild(closeButton);
+  
+    // Prepend the error popup to the document body
+    document.body.prepend(errorPopup);
+  }
+  else{
+    console.error("no error still error pop up was tried to open, Contact Admin")
+  }
+  
 }
 
 // Function to add a full-width header with a fixed height and red background color
@@ -437,7 +455,10 @@ export function initialize(loggedInUser) {
     const api_key = localStorage.getItem("tezkit_api_key")
 
     console.log("arewe gonna fire this!!")
-    if (app_name && api_key) {
+    if (!app_name || !api_key) {
+      console.error("app_name not provided to the client!");
+    }
+    else {
       console.log("arerewrewrew")
       const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
       const headersList = {
@@ -472,9 +493,7 @@ export function initialize(loggedInUser) {
 
 
 
-    } else {
-      console.error("app_name not provided to the client!");
-    }
+    } 
 
 
   }
@@ -510,8 +529,6 @@ export function initialize(loggedInUser) {
           console.log("when message arrives! lets raise an error?", data)
 
           console.log("when message arrives! lets raise an error?", data);
-
-          renderErrorPopup()
 
 
           const p_data = JSON.parse(data);
@@ -624,81 +641,6 @@ export function initialize(loggedInUser) {
     }
 
 
-
-
-
-
-    // socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-    //   const p_data = JSON.parse(data);
-    //   console.log("arew we getting this now?", p_data);
-
-    //   if (!p_data.message.action) {
-    //     console.error("No action provided!");
-    //   } else {
-    //     console.log("hwere i am  let's go champ!!!!!");
-    //     if (p_data.message.action == "MSG_UPDATED_EVENT") {
-    //       console.log("do we get it the when message is seen???", p_data);
-    //       console.log(
-    //         p_data.message.message,
-    //         "FIND status in message? IT SEEMS WE GOT SOME STATUS UPDATE ON MSGS.  @Admin.. lets get msg_id",
-    //         data,
-    //         typeof data
-    //       );
-
-    //       // message =
-    //       const msg = p_data.message.message;
-    //       const msg_id = p_data.message.msg_id;
-    //       console.log(msg_id, "what is this msg", msg);
-
-    //       console.log("my messg id",msg_id );
-
-    //       // a = "msg_id__1"
-    //       // 'msg_id__1'
-    //       const msg_calc_ind = msg_id.split("msg_id__")[1];
-
-    //       // ind = a.split('msg_id__')[1]
-    //       // '1'
-    //       // document.getElementById('chat_modal')
-
-    //       // First, grab the parent element with id 'chatBody'
-    //       const chatBody = document.getElementById("chatBody");
-
-    //       // Get all <p> elements within .message.admin divs
-    //       const messageElements = chatBody.querySelectorAll(".message.admin p");
-
-    //       // Now, access the nth message (where n is the index, starting from 0)
-    //       // const msg_calc_ind = 2; // For example, this will give you the 3rd message (index 2)
-    //       if (msg_calc_ind - 1 < messageElements.length) {
-    //         const nthMessage = messageElements[msg_calc_ind - 1];
-    //         console.log("nthMessageText", nthMessage);
-    //         nthMessage.textContent = msg;
-    //       } else {
-    //         console.error("No message found at this index. to be updated");
-    //       }
-
-    //       // Finally, get the text content of the <p> tag
-
-    //       // console.log(messageText); // Output: "the message"
-
-    //       // updateMsg(p_data.message.msg_id, msg);
-    //     }
-
-
-    //     if (p_data.message.action == "MSG_REACTION_EVENT") {
-    //       console.log("reaction received!!!",p_data);
-    //     } else {
-    //       console.error("Action Not Yet Handled!");
-    //     }
-    //   }
-
-    //   // Let's make the msgs all READ
-    // });  
-
-
-    // Function to extract message index from msg_id
-
-
-
     function updateMessageText(messageElement, newText) {
       const messageText = messageElement.querySelector("p");
       if (messageText) {
@@ -787,10 +729,6 @@ export function initialize(loggedInUser) {
 
   console.log("are we here yet!");
 
-  // // Create the full-screen div
-  // const fullScreenDiv = document.createElement('div');
-  // fullScreenDiv.classList.add('full-screen-div');
-  // document.body.appendChild(fullScreenDiv);
 
   // Create the modal element
   const modal = document.createElement("div");
