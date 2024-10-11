@@ -18,6 +18,16 @@ const identifiers = {}
 let chat_modal_open = false
 export { chat_modal_open };
 
+function updateMessageText(messageElement, newText) {
+  const messageText = messageElement.querySelector("p");
+  if (messageText) {
+    messageText.textContent = newText;
+    console.log("Message updated to:", newText);
+  } else {
+    console.error("Message text element not found.");
+  }
+}
+
 
 function incrementNotificationsCount() {
   const notification_num_div = document.getElementById("notification_num");
@@ -210,6 +220,13 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
 
 export function renderAuthHeader(token) {
   const header = document.createElement("header");
+  const theme = localStorage.getItem('theme')
+  const theme_p = JSON.parse(theme)
+  if (theme_p && theme_p.header_theme){
+    //override css here...
+    header.style.backgroundColor = theme_p.header_theme['backgroundColor']
+
+  }
   header.classList.add("header");
 
   const leftPart = document.createElement("div");
@@ -341,13 +358,18 @@ function checkViewportSize() {
   }
 }
 
-export function setUp(app_name, api_key) {
+export function setUp(app_name, api_key,theme=null) {
   try {
     if (!app_name || !api_key) {
       throw new Error("App name or API key is missing.");
     }
     localStorage.setItem("tezkit_app_name", app_name);
     localStorage.setItem("tezkit_api_key", api_key);
+    if (theme){
+
+       localStorage.setItem('theme',theme)
+    }
+   
     initialize()
 
   } catch (error) {
@@ -655,15 +677,7 @@ export function initialize(loggedInUser) {
     }
 
 
-    function updateMessageText(messageElement, newText) {
-      const messageText = messageElement.querySelector("p");
-      if (messageText) {
-        messageText.textContent = newText;
-        console.log("Message updated to:", newText);
-      } else {
-        console.error("Message text element not found.");
-      }
-    }
+   
 
     // Function to update the reaction
     function updateMessageReaction(messageElement, reaction) {
@@ -835,6 +849,17 @@ export function initialize(loggedInUser) {
   chat_modal_container.style.alignItems = "center";
   chat_modal_container.style.justifyContent = "center";
   chat_modal_container.style.backgroundColor = "#A370CE";
+
+  const theme = localStorage.getItem('theme')
+  const theme_p = JSON.parse(theme)
+  console.log("what is this theme here?",theme)
+  if (theme_p && theme_p.chat_opener_theme){
+    //override css here...
+    chat_modal_container.style.backgroundColor = theme_p.chat_opener_theme['backgroundColor'] 
+
+  }
+
+
   chat_modal_container.style.height = "50px";
   chat_modal_container.style.width = "50px";
   chat_modal_container.style.borderRadius = "50%";
