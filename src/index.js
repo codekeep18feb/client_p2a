@@ -25,6 +25,60 @@ function incrementNotificationsCount() {
     Number(notification_num_div.textContent) + 1;
 }
 
+function getMessageIndex(msg_id) {
+  const msg_calc_ind = msg_id.split("msg_id__")[1];
+  return parseInt(msg_calc_ind, 10) - 1;
+}
+
+// Function to get a specific message element by index
+function getMessageElement(index, chatBody) {
+  const messageElements = chatBody.querySelectorAll(".message");
+  if (index < messageElements.length) {
+    return messageElements[index];
+  } else {
+    console.error("No message found at this index:", index);
+    return null;
+  }
+}
+
+
+function newReplyHandler(p_data) {
+  console.log("here prepare the data for the rest of the code .",p_data)
+  const { msg_id, message } = p_data;
+  console.log("Extracted msg_id:", msg_id);
+  const replyMsg = message;
+
+  console.log("renderReplyMessage with replyMsg:", replyMsg);
+
+  const replyWrapper = document.createElement("div");
+  replyWrapper.classList.add("message", "admin");
+
+  const replyElement = document.createElement("div");
+  replyElement.classList.add("reply-message");
+
+
+
+  const replyText = replyMsg;
+
+  console.log("replyText msg", replyText)
+  const replyTime = p_data.timestamp || new Date().toLocaleTimeString();
+  const originalMsg = p_data.to_msg.msg
+  replyElement.innerHTML = `
+    <div class="original-message">
+      <p>${originalMsg}</p>
+    </div>
+    <div class="reply-content">
+      <p>${replyText}</p>
+      <span class="time">${replyTime}</span>
+    </div>
+  `;
+
+  console.log("reply message with original message", replyElement);
+  replyWrapper.appendChild(replyElement);
+  return replyWrapper
+}
+
+
 
 // Function to change the background color of the body
 export function changeBackgroundColor() {
@@ -124,17 +178,34 @@ export function renderCustomizeComponent() {
 
 let socket;
 
-function addNewElementToChatBody(obj) {
-  const new_messageElement = document.createElement("div");
-  new_messageElement.classList.add("message");
-  new_messageElement.classList.add("admin");
-  new_messageElement.innerHTML = `
-        <div>
-        <p>${obj.msg}</p>
-        <span class="time">${obj.timestamp}</span>
-        </div>
-    `;
-  chatBody.appendChild(new_messageElement);
+function addNewElementToChatBody(obj, msg_type='REGULAR') {
+
+  let append_msg = null
+  if (msg_type=='REGULAR'){
+    const new_messageElement = document.createElement("div");
+    new_messageElement.classList.add("message");
+    new_messageElement.classList.add("admin");
+    new_messageElement.innerHTML = `
+          <div>
+          <p>${obj.msg}</p>
+          <span class="time">${obj.timestamp}</span>
+          </div>
+      `;
+      append_msg = new_messageElement
+
+  }
+  
+
+  else if (msg_type=='REPLY'){
+    append_msg =  newReplyHandler(obj)
+  }
+  else{
+
+    console.error("no msg_type provided!")
+  }
+  chatBody.appendChild(append_msg);
+
+  
 }
 
 export function renderAuthHeader(token) {
@@ -424,7 +495,7 @@ export function initialize(loggedInUser) {
       const p_data = JSON.parse(data);
       console.log("reply msg data", p_data);
 
-      handleReplyMessageEvent(p_data);
+      addNewElementToChatBody(p_data, "REPLY");
     })
 
 
@@ -578,21 +649,7 @@ export function initialize(loggedInUser) {
 
     // Function to extract message index from msg_id
 
-    function getMessageIndex(msg_id) {
-      const msg_calc_ind = msg_id.split("msg_id__")[1];
-      return parseInt(msg_calc_ind, 10) - 1;
-    }
 
-    // Function to get a specific message element by index
-    function getMessageElement(index, chatBody) {
-      const messageElements = chatBody.querySelectorAll(".message");
-      if (index < messageElements.length) {
-        return messageElements[index];
-      } else {
-        console.error("No message found at this index:", index);
-        return null;
-      }
-    }
 
     function updateMessageText(messageElement, newText) {
       const messageText = messageElement.querySelector("p");
@@ -644,60 +701,6 @@ export function initialize(loggedInUser) {
     }
 
 
-    function handleReplyMessageEvent(p_data) {
-      console.log("reply datavfjvn:", p_data);
-
-      const { msg_id, message } = p_data;
-      console.log("Extracted msg_id:", msg_id);
-      const replyMsg = message;
-      const chatBody = document.getElementById("chatBody");
-
-      const msgIndex = getMessageIndex(p_data.to_msg.msg_id);
-      console.log("When receiving a reply to message at index:", msgIndex);
-
-      const messageElement = getMessageElement(msgIndex, chatBody);
-      console.log("messageElement", messageElement);
-
-      if (messageElement) {
-        renderReplyMessage(messageElement, replyMsg);
-      }
-    }
-
-    function renderReplyMessage(originalMessageText, replyMsg) {
-      console.log("renderReplyMessage with replyMsg:", replyMsg);
-
-      console.log("originalMessageText:", originalMessageText);
-
-      const chatBody = document.getElementById("chatBody");
-      const replyWrapper = document.createElement("div");
-      replyWrapper.classList.add("message", "admin");
-
-      const replyElement = document.createElement("div");
-      replyElement.classList.add("reply-message");
-
-
-      const originalText = originalMessageText.querySelector("p").textContent;
-      console.log("originalText msg", originalText)
-
-      const replyText = replyMsg;
-
-      console.log("replyText msg", replyText)
-      const replyTime = replyMsg.timestamp || new Date().toLocaleTimeString();
-
-      replyElement.innerHTML = `
-        <div class="original-message">
-          <p>${originalText}</p>
-        </div>
-        <div class="reply-content">
-          <p>${replyText}</p>
-          <span class="time">${replyTime}</span>
-        </div>
-      `;
-
-      console.log("reply message with original message", replyElement);
-      replyWrapper.appendChild(replyElement);
-      chatBody.appendChild(replyWrapper);
-    }
 
 
 
