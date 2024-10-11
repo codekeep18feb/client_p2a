@@ -43,7 +43,7 @@ function getMessageElement(index, chatBody) {
 
 
 function newReplyHandler(p_data) {
-  console.log("here prepare the data for the rest of the code .",p_data)
+  console.log("here prepare the data for the rest of the code .", p_data)
   const { msg_id, message } = p_data;
   console.log("Extracted msg_id:", msg_id);
   const replyMsg = message;
@@ -178,10 +178,10 @@ export function renderCustomizeComponent() {
 
 let socket;
 
-function addNewElementToChatBody(obj, msg_type='REGULAR') {
+function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
 
   let append_msg = null
-  if (msg_type=='REGULAR'){
+  if (msg_type == 'REGULAR') {
     const new_messageElement = document.createElement("div");
     new_messageElement.classList.add("message");
     new_messageElement.classList.add("admin");
@@ -191,21 +191,21 @@ function addNewElementToChatBody(obj, msg_type='REGULAR') {
           <span class="time">${obj.timestamp}</span>
           </div>
       `;
-      append_msg = new_messageElement
+    append_msg = new_messageElement
 
   }
-  
 
-  else if (msg_type=='REPLY'){
-    append_msg =  newReplyHandler(obj)
+
+  else if (msg_type == 'REPLY') {
+    append_msg = newReplyHandler(obj)
   }
-  else{
+  else {
 
     console.error("no msg_type provided!")
   }
   chatBody.appendChild(append_msg);
 
-  
+
 }
 
 export function renderAuthHeader(token) {
@@ -335,28 +335,79 @@ export function setUp(app_name, api_key) {
 
 
 function updateNotificationBell(tezkit_app_data) {
-  if (tezkit_app_data){
-  const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-  // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
-  
-  if (tezkit_app_p_data.settings.authCloudManaged){
-  incrementNotificationsCount()
-  
-  }
-  }
-  }
-  
-  function informPeerSysAboutMsgStatus(socket, assigned_msg_id) {
-  socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-  action: "MSG_STATUS_CHANGE_EVENT",
-  msg_id: assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-  room: "global_for__1",
-  message: "READ",
-  timestamp: new Date().toLocaleTimeString(),
-  });
-  }
+  if (tezkit_app_data) {
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
-  
+    if (tezkit_app_p_data.settings.authCloudManaged) {
+      incrementNotificationsCount()
+
+    }
+  }
+}
+
+function informPeerSysAboutMsgStatus(socket, assigned_msg_id) {
+  socket.emit("ON_MESSAGE_STATUS_CHANGED", {
+    action: "MSG_STATUS_CHANGE_EVENT",
+    msg_id: assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
+    room: "global_for__1",
+    message: "READ",
+    timestamp: new Date().toLocaleTimeString(),
+  });
+}
+
+function renderErrorPopup() {
+  // Create the error popup container
+  const errorPopup = document.createElement("div");
+  errorPopup.style.position = "fixed";
+  errorPopup.style.top = "20px";
+  errorPopup.style.right = "20px";
+  errorPopup.style.padding = "20px";
+  errorPopup.style.backgroundColor = "#ff4d4d";
+  errorPopup.style.color = "#fff";
+  errorPopup.style.border = "1px solid #ff1a1a";
+  errorPopup.style.zIndex = "10000";
+  errorPopup.style.borderRadius = "5px";
+  errorPopup.style.maxWidth = "300px";
+  errorPopup.style.fontFamily = "Arial, sans-serif";
+
+  // Create the error title
+  const errorTitle = document.createElement("h3");
+  errorTitle.textContent = "Error(s) Occurred";
+  errorPopup.appendChild(errorTitle);
+
+  // Create the error list
+  const errorList = document.createElement("ul");
+
+  // Assume `data.errors` contains the list of errors (adjust accordingly)
+  ["ERR1", "ERR2"].forEach((error) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = error;
+    errorList.appendChild(listItem);
+  });
+
+  errorPopup.appendChild(errorList);
+
+  // Append close button
+  const closeButton = document.createElement("button");
+  closeButton.textContent = "Close";
+  closeButton.style.marginTop = "10px";
+  closeButton.style.backgroundColor = "#ff1a1a";
+  closeButton.style.color = "#fff";
+  closeButton.style.border = "none";
+  closeButton.style.padding = "5px 10px";
+  closeButton.style.cursor = "pointer";
+  closeButton.style.borderRadius = "3px";
+
+  closeButton.addEventListener("click", () => {
+    errorPopup.remove();
+  });
+
+  errorPopup.appendChild(closeButton);
+
+  // Prepend the error popup to the document body
+  document.body.prepend(errorPopup);
+}
 
 // Function to add a full-width header with a fixed height and red background color
 export function initialize(loggedInUser) {
@@ -441,142 +492,139 @@ export function initialize(loggedInUser) {
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
+    if (!identifiers.hasOwnProperty("name_idn")) {
+      console.error("`name_idn` does not exist");
 
-    console.log(loggedInUser, identifiers, "user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+    }
+    else {
+      if (!loggedInUser.hasOwnProperty(identifiers["name_idn"])) {
+        console.log(`${identifiers["name_idn"]} does not exist`);
 
-    socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
-
-    // socket.emit('ON_MESSAGE_STATUS_CHANGED', );
-    // console.log("waterw .id",loggedInUser)
-
-    // console.log('joined room :: ',"global_for__" + loggedInUser[identifiers["name_idn"]])
-    // socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
-
-
-    socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
-      console.log("isndie readl one", data)
-      const p_data = JSON.parse(data);
-      console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
-
-      socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-        action: "MSG_STATUS_CHANGE_EVENT",
-        msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-        room: "global_for__" + p_data.message.frm_user.id,
-        message: "DELIVERED",
-        timestamp: new Date().toLocaleTimeString(),
-      });
-
-      // update notifications bell
-      updateNotificationBell(tezkit_app_data)
-
-      // const sd = JSON.parse(data)
-      const msg = p_data["message"]["message"];
-      const timestamp = p_data["message"]["timestamp"];
-
-      if (chat_modal_open) {
-        console.log("is there anything yet stored in the global_bucket", global_bucket)
-
-        addNewElementToChatBody({ msg, timestamp });
-        informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
-      } else {
-        console.log("arewe atleasthere", global_bucket)
-        global_bucket.unread_msgs.push({
-          msg,
-          timestamp,
-          assigned_msg_id: p_data.message.assigned_msg_id,
-        });
       }
-    });
+      else {
+        console.log(loggedInUser, identifiers, "user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
+
+        socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
+
+        socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
+          console.log("when message arrives! lets raise an error?", data)
+
+          console.log("when message arrives! lets raise an error?", data);
+
+          renderErrorPopup()
 
 
-    socket.on('ON_MESSAGE_ARRIVAL', function (data) {
-      console.log("Reply Recieved!", data)
+          const p_data = JSON.parse(data);
+          console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
 
-      const p_data = JSON.parse(data);
-      console.log("reply msg data", p_data);
+          socket.emit("ON_MESSAGE_STATUS_CHANGED", {
+            action: "MSG_STATUS_CHANGE_EVENT",
+            msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
+            room: "global_for__" + p_data.message.frm_user.id,
+            message: "DELIVERED",
+            timestamp: new Date().toLocaleTimeString(),
+          });
 
-      addNewElementToChatBody(p_data, "REPLY");
-    })
+          // update notifications bell
+          updateNotificationBell(tezkit_app_data)
 
+          // const sd = JSON.parse(data)
+          const msg = p_data["message"]["message"];
+          const timestamp = p_data["message"]["timestamp"];
 
-    // Main socket event handler
-    socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-      const p_data = JSON.parse(data);
-      console.log("Received status change:", p_data);
+          if (chat_modal_open) {
+            console.log("is there anything yet stored in the global_bucket", global_bucket)
 
-      if (!p_data.message.action) {
-        console.error("No action provided!");
-        return;
-      }
-
-      if (p_data.message.action === "MSG_UPDATED_EVENT") {
-        handleMsgUpdatedEvent(p_data);
-      } else if (p_data.message.action === "MSG_REACTION_EVENT") {
-        handleMsgReactionEvent(p_data);
-      } else {
-        console.error("Action Not Yet Handled:", p_data.message.action);
-      }
-    });
-
-
-
-
-    // Usage in toggleChatModal or socket.on
-
-
-    socket.on("ON_USER_LIVE_STATUS", function (data) {
-      const p_data = JSON.parse(data);
-      console.log("is user going offline?", p_data);
-
-      if (!p_data.hasOwnProperty('status')) {
-        console.error("No status provided!");
-      } else {
-        const statusElement = document.getElementById("statusElement");
-
-        if (statusElement) {
-          if (p_data.status === true) {
-            console.log("Admin is Online");
-            statusElement.textContent = "";
-            statusElement.style.background = "#9acd32";
-          } else if (p_data.status === false) {
-            console.log("Admin is Offline");
-            statusElement.textContent = "";
-            statusElement.style.background = "#a99bbe";
+            addNewElementToChatBody({ msg, timestamp });
+            informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
+          } else {
+            console.log("arewe atleasthere", global_bucket)
+            global_bucket.unread_msgs.push({
+              msg,
+              timestamp,
+              assigned_msg_id: p_data.message.assigned_msg_id,
+            });
           }
-        }
+        });
+
+
+        socket.on('ON_MESSAGE_ARRIVAL', function (data) {
+          console.log("Reply Recieved!", data)
+
+          const p_data = JSON.parse(data);
+          console.log("reply msg data", p_data);
+
+          addNewElementToChatBody(p_data, "REPLY");
+        })
+
+
+        // Main socket event handler
+        socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
+          const p_data = JSON.parse(data);
+          console.log("Received status change:", p_data);
+
+          if (!p_data.message.action) {
+            console.error("No action provided!");
+            return;
+          }
+
+          if (p_data.message.action === "MSG_UPDATED_EVENT") {
+            handleMsgUpdatedEvent(p_data);
+          } else if (p_data.message.action === "MSG_REACTION_EVENT") {
+            handleMsgReactionEvent(p_data);
+          } else {
+            console.error("Action Not Yet Handled:", p_data.message.action);
+          }
+        });
+
+
+
+
+        // Usage in toggleChatModal or socket.on
+
+
+        socket.on("ON_USER_LIVE_STATUS", function (data) {
+          const p_data = JSON.parse(data);
+          console.log("is user going offline?", p_data);
+
+          if (!p_data.hasOwnProperty('status')) {
+            console.error("No status provided!");
+          } else {
+            const statusElement = document.getElementById("statusElement");
+
+            if (statusElement) {
+              if (p_data.status === true) {
+                console.log("Admin is Online");
+                statusElement.textContent = "";
+                statusElement.style.background = "#9acd32";
+              } else if (p_data.status === false) {
+                console.log("Admin is Offline");
+                statusElement.textContent = "";
+                statusElement.style.background = "#a99bbe";
+              }
+            }
+
+          }
+        });
+
+
+
+        socket.on("ON_FILE_UPLOAD", function (data) {
+          // const p_data = JSON.parse(data);
+          console.log("some file it seeems was uploaded?", data, typeof (data));
+          delete data.result.message;
+
+          renderMessage(data, 'FILE_MIXED');
+
+
+
+        });
 
       }
-    });
+    }
 
 
 
-    socket.on("ON_FILE_UPLOAD", function (data) {
-      // const p_data = JSON.parse(data);
-      console.log("some file it seeems was uploaded?", data, typeof (data));
-      delete data.result.message;
-
-      renderMessage(data, 'FILE_MIXED');
-
-
-
-      //HERE WILL ADD A MSG BOX TO THE MAIN MSG WRAPPER
-      //   {
-      //     "result": {
-      //         "message": "Files and fields processed successfully",
-      //         "files": [
-      //             "https://muti-media-bckt.s3.amazonaws.com/p2p/1__to__2/pexels-daan-rink-7047366.jpg",
-      //             "https://muti-media-bckt.s3.amazonaws.com/p2p/1__to__2/pickme.png"
-      //         ],
-      //         "sometext_data": [
-      //             "Editable content here"
-      //         ]
-      //     },
-      //     "to_user": {
-      //         "id": "2"
-      //     }
-      // }
-
-    });
 
 
 
@@ -863,9 +911,9 @@ export function initialize(loggedInUser) {
   chat_modal_opener.addEventListener("click", function () {
     // const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
-    console.log(tezkit_app_data, "here is bucket's data",global_bucket)
+    console.log(tezkit_app_data, "here is bucket's data", global_bucket)
 
-    if (global_bucket){
+    if (global_bucket) {
       // const p_data = global_bucket.unread_msgs[0]
 
       global_bucket.unread_msgs.forEach(p_data => {
@@ -873,15 +921,15 @@ export function initialize(loggedInUser) {
         const msg = p_data["msg"]
         const timestamp = p_data["timestamp"];
         const assigned_msg_id = p_data["assigned_msg_id"]
-    
+
         addNewElementToChatBody({ msg, timestamp });
         informPeerSysAboutMsgStatus(socket, assigned_msg_id)
       });
       global_bucket.unread_msgs = []
-     
+
     }
 
-    
+
     toggleChatModal();
 
   });
