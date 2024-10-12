@@ -12,6 +12,8 @@ import myImage from "./tezkit_logo.jpg";
 let global_bucket = { unread_msgs: [] };
 export { global_bucket };
 
+// let user_msgs = []
+
 const identifiers = {}
 
 
@@ -365,12 +367,28 @@ export function setUp(app_name, api_key,theme=null) {
     }
     localStorage.setItem("tezkit_app_name", app_name);
     localStorage.setItem("tezkit_api_key", api_key);
-    if (theme){
-
-       localStorage.setItem('theme',theme)
+    let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
+    if (!tezkit_msgs_data){
+      const initial_msgs_data_str = JSON.stringify({"api_key":api_key,msgs:[]})
+      localStorage.setItem("tezkit_msgs_data", initial_msgs_data_str);
     }
-   
-    initialize()
+    else{
+      tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
+      if (tezkit_msgs_data['api_key'] !== api_key){
+        // console.error("Api Key did not match; Should probably logout and login back.")
+        renderErrorPopup(["Api Key did not match; Should probably logout and login back."])
+        
+      }
+      
+    }
+
+    if (theme){
+  
+      localStorage.setItem('theme',theme)
+   }
+  
+   initialize()
+
 
   } catch (error) {
     console.error("Failed to set up localStorage:", error.message);
@@ -471,9 +489,35 @@ export function initialize(loggedInUser) {
   const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
   if (tezkit_app_data) {
-    console.log("are you here?")
+
+
+    //HERE WE CAN PROBABLY LOAD THE CHATS FROM LS
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
+
+    console.log("are you here?",tezkit_app_p_data.auth_key)
+    
+    let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
+    
+    //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
+    const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)  
+    if (tezkit_app_p_data.auth_key != tezkit_msgs_p_data.api_key){
+      console.error("Key did not seem to match, Please logout and login back")
+    }
+    else{
+      const prv_msgs_ls = tezkit_msgs_p_data
+
+      console.log(prv_msgs_ls, "here we can insert it to the bucket",typeof(prv_msgs_ls.msgs),prv_msgs_ls.msgs)
+      const p_msgs = prv_msgs_ls.msgs
+      global_bucket.unread_msgs.push(...p_msgs)
+    }     
+ 
+    
+    
+    
+    // if (tex)
+
+
+    // LET'S LOAD IT TO THE BUCKET.
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
       identifiers["name_idn"] = "id"
@@ -561,12 +605,21 @@ export function initialize(loggedInUser) {
         socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
+
           console.log("when message arrives! lets raise an error?", data)
+          
+          const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
 
-          console.log("when message arrives! lets raise an error?", data);
+          //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
+          const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
+          console.log("wht is it @ reoload",tezkit_msgs_p_data)   
+          // const prv_msgs_ls = tezkit_msgs_p_data
+          const p_data = JSON.parse(data)
+          tezkit_msgs_p_data.msgs.push(p_data)
+          
+          const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
+          localStorage.setItem("tezkit_msgs_data",prv_msg_data_string_ls);
 
-
-          const p_data = JSON.parse(data);
           console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
 
           socket.emit("ON_MESSAGE_STATUS_CHANGED", {
@@ -581,21 +634,21 @@ export function initialize(loggedInUser) {
           updateNotificationBell(tezkit_app_data)
 
           // const sd = JSON.parse(data)
-          const msg = p_data["message"]["message"];
-          const timestamp = p_data["message"]["timestamp"];
+          // const msg = p_data["message"]["message"];
+          // const timestamp = p_data["message"]["timestamp"];
+          const assigned_msg_id = p_data.message.assigned_msg_id
 
           if (chat_modal_open) {
             console.log("is there anything yet stored in the global_bucket", global_bucket)
-
+            const msg = p_data["message"]["message"];
+            const timestamp = p_data["message"]["timestamp"];
             addNewElementToChatBody({ msg, timestamp });
             informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
           } else {
             console.log("arewe atleasthere", global_bucket)
-            global_bucket.unread_msgs.push({
-              msg,
-              timestamp,
-              assigned_msg_id: p_data.message.assigned_msg_id,
-            });
+
+            console.log("whats the diff",p_data)
+            global_bucket.unread_msgs.push(p_data);
           }
         });
 
@@ -883,10 +936,11 @@ export function initialize(loggedInUser) {
       // const p_data = global_bucket.unread_msgs[0]
 
       global_bucket.unread_msgs.forEach(p_data => {
+        console.log("what is this after relaod?",p_data)
         updateNotificationBell(tezkit_app_data)
-        const msg = p_data["msg"]
-        const timestamp = p_data["timestamp"];
-        const assigned_msg_id = p_data["assigned_msg_id"]
+        const msg = p_data["message"]["message"]
+        const timestamp = p_data["message"]["timestamp"];
+        const assigned_msg_id = p_data["message"]["assigned_msg_id"]
 
         addNewElementToChatBody({ msg, timestamp });
         informPeerSysAboutMsgStatus(socket, assigned_msg_id)
