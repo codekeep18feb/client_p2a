@@ -81,7 +81,7 @@ function newReplyHandler(p_data) {
     </div>
     <div class="reply-content">
       <p>${replyText}</p>
-      <span class="time">${replyTime}</span>
+      <span class="timestamp">${replyTime}</span>
     </div>
   `;
 
@@ -191,6 +191,7 @@ export function renderCustomizeComponent() {
 let socket;
 
 function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
+  console.log("this is when the msg is reieved??",obj)
 
   let append_msg = null
   if (msg_type == 'REGULAR') {
@@ -200,7 +201,7 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
     new_messageElement.innerHTML = `
           <div>
           <p>${obj.msg}</p>
-          <span class="time">${obj.timestamp}</span>
+          <span class="timestamp">${obj.timestamp}</span>
           </div>
       `;
     append_msg = new_messageElement
@@ -208,9 +209,49 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
   }
 
 
-  else if (msg_type == 'REPLY') {
-    append_msg = newReplyHandler(obj)
+  else if (msg_type === 'FILE_MIXED') {
+    const messageWrapper = document.createElement("div");
+    messageWrapper.classList.add("message-container");
+
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
+    // messageElement.classList.add(obj.to_user.id || "de");
+
+    // Handling files, showing them directly as images
+    let filesHtml = '';
+    if (obj.result.files && obj.result.files.length > 0) {
+      filesHtml = obj.result.files.map(fileUrl => {
+
+        // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
+        return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
+      }).join("");
+    }
+
+    // Handling text content
+    let textHtml = '';
+    if (obj.result.sometext_data && obj.result.sometext_data.length > 0) {
+      textHtml = JSON.parse(obj.result.sometext_data).map(msg => {
+        return `<p>${msg}</p>`;
+      }).join("");
+    }
+
+    // Construct the message inner HTML
+    messageElement.innerHTML = `
+      <div class="file-mixed-content">
+        ${filesHtml}
+        ${textHtml}
+      </div>
+      <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+    `;
+
+    console.log("Rendering FILE_MIXED message:", messageElement);
+
+    // Append the new message at the bottom of chatBody
+    // chatBody.appendChild(messageWrapper);
+    messageWrapper.appendChild(messageElement);
+    append_msg = messageWrapper
   }
+  
   else {
 
     console.error("no msg_type provided!")
@@ -636,7 +677,7 @@ export function initialize(loggedInUser) {
           // const sd = JSON.parse(data)
           // const msg = p_data["message"]["message"];
           // const timestamp = p_data["message"]["timestamp"];
-          const assigned_msg_id = p_data.message.assigned_msg_id
+          // const assigned_msg_id = p_data.message.assigned_msg_id
 
           if (chat_modal_open) {
             console.log("is there anything yet stored in the global_bucket", global_bucket)
@@ -720,7 +761,7 @@ export function initialize(loggedInUser) {
           console.log("some file it seeems was uploaded?", data, typeof (data));
           delete data.result.message;
 
-          renderMessage(data, 'FILE_MIXED');
+          addNewElementToChatBody(data, 'FILE_MIXED');
 
 
 
@@ -978,6 +1019,7 @@ export function initialize(loggedInUser) {
 
 
   function renderMessage(newMessage, type = 'REGULAR') {
+    console.log("this is when the msg is sent??",newMessage)
     if (newMessage) {
       if (type === 'REGULAR') {
         const messageWrapper = document.createElement("div");
@@ -985,13 +1027,13 @@ export function initialize(loggedInUser) {
 
         const messageElement = document.createElement("div");
         messageElement.classList.add("message");
-        messageElement.classList.add(newMessage.sender || "de");
+        // messageElement.classList.add(newMessage.sender || "de");
 
         const reactionHtml = renderReaction(newMessage.reaction);
 
         messageElement.innerHTML = `
-          <p>${newMessage.text}</p>
-          <span class="time">${newMessage.time}</span>
+          <p>${newMessage.msg}</p>
+          <span class="timestamp">${newMessage.timestamp}</span>
           ${reactionHtml}
         `;
 
@@ -1022,8 +1064,8 @@ export function initialize(loggedInUser) {
         // Handling text content
         let textHtml = '';
         if (newMessage.result.sometext_data && newMessage.result.sometext_data.length > 0) {
-          textHtml = JSON.parse(newMessage.result.sometext_data).map(text => {
-            return `<p>${text}</p>`;
+          textHtml = JSON.parse(newMessage.result.sometext_data).map(msg => {
+            return `<p>${msg}</p>`;
           }).join("");
         }
 
@@ -1033,7 +1075,7 @@ export function initialize(loggedInUser) {
             ${filesHtml}
             ${textHtml}
           </div>
-          <span class="time">${new Date().toLocaleTimeString()}</span>
+          <span class="timestamp">${new Date().toLocaleTimeString()}</span>
         `;
 
         console.log("Rendering FILE_MIXED message:", messageElement);
@@ -1070,16 +1112,16 @@ export function initialize(loggedInUser) {
       const messageText = chatInput.value;
       if (messageText.trim() !== "") {
         const newMessage = {
-          text: messageText,
-          sender: "user",
-          time: new Date().toLocaleTimeString([], {
+          msg: messageText,
+          // sender: "user",
+          timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
         };
 
 
-        console.log("w atis thsi", loggedInUser);
+        console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
 
         messages.push(newMessage);
