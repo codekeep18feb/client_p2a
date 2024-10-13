@@ -81,7 +81,7 @@ function newReplyHandler(p_data) {
     </div>
     <div class="reply-content">
       <p>${replyText}</p>
-      <span class="time">${replyTime}</span>
+      <span class="timestamp">${replyTime}</span>
     </div>
   `;
 
@@ -190,31 +190,131 @@ export function renderCustomizeComponent() {
 
 let socket;
 
-function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
+function addNewElementToChatBody(obj, msg_type = 'REGULAR', msg_direction = "INCOMING") {
+  console.log("does it comply with the format?", obj)
 
   let append_msg = null
   if (msg_type == 'REGULAR') {
+    console.log("is it going frm here?", obj)
     const new_messageElement = document.createElement("div");
     new_messageElement.classList.add("message");
     new_messageElement.classList.add("admin");
     new_messageElement.innerHTML = `
           <div>
-          <p>${obj.msg}</p>
-          <span class="time">${obj.timestamp}</span>
+          <p>${obj["message"]}</p>
+          <span class="timestamp">${obj['timestamp']}</span>
           </div>
       `;
     append_msg = new_messageElement
 
   }
+  if (msg_type == 'REPLY') {
+    // console.log("is it going frm here?", obj)
+    // const new_messageElement = document.createElement("div");
+    // new_messageElement.classList.add("message");
+    // new_messageElement.classList.add("admin");
+    // new_messageElement.innerHTML = `
+    //       <div>
+    //       <p>${obj.message.message}</p>
+    //       <span class="timestamp">${obj.message.timestamp}</span>
+    //       </div>
+    //   `;
+    // append_msg = new_messageElement
 
 
-  else if (msg_type == 'REPLY') {
-    append_msg = newReplyHandler(obj)
+    console.log("renderReplyMessage with replyMsg:", obj);
+
+      console.log("originalMessageText:", obj.message.to_msg.msg);
+
+      // const chatBody = document.getElementById("chatBody");
+      const replyWrapper = document.createElement("div");
+      replyWrapper.classList.add("message", "admin");
+
+      const replyElement = document.createElement("div");
+      replyElement.classList.add("reply-message");
+
+
+      // const originalText = originalMessageText.querySelector("p").textContent;
+      console.log("originalText msg",obj.message.to_msg.msg)
+
+      // const replyText = obj.message;
+
+      // console.log("replyText msg",replyText)
+      const replyTime = obj.message.timestamp|| new Date().toLocaleTimeString(); 
+
+      replyElement.innerHTML = `
+        <div class="original-message">
+          <p>${obj.message.to_msg.msg}</p>
+        </div>
+        <div class="reply-content">
+          <p>${obj.message.message}</p>
+          <span class="time">${replyTime}</span>
+        </div>
+      `;
+
+      console.log("reply message with original message", replyElement);
+      replyWrapper.appendChild(replyElement);
+      append_msg = replyWrapper
+
   }
+
+
+  else if (msg_type === 'FILE_MIXED') {
+    const messageWrapper = document.createElement("div");
+    messageWrapper.classList.add("message-container");
+
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
+    // messageElement.classList.add(obj.to_user.id || "de");
+
+    // Handling files, showing them directly as images
+    console.log("objsdsdfobj",obj)
+    let filesHtml = '';
+    if (obj.message.result.files && obj.message.result.files.length > 0) {
+      filesHtml = obj.message.result.files.map(fileUrl => {
+
+        // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
+        return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
+      }).join("");
+    }
+
+    // Handling text content
+    let textHtml = '';
+    if (obj.message.result.sometext_data && obj.message.result.sometext_data.length > 0) {
+      textHtml = JSON.parse(obj.message.result.sometext_data).map(msg => {
+        return `<p>${msg}</p>`;
+      }).join("");
+    }
+
+    // Construct the message inner HTML
+    messageElement.innerHTML = `
+      <div class="file-mixed-content">
+        ${filesHtml}
+        ${textHtml}
+      </div>
+      <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+    `;
+
+    console.log("Rendering FILE_MIXED message:", messageElement);
+
+    // Append the new message at the bottom of chatBody
+    // chatBody.appendChild(messageWrapper);
+    messageWrapper.appendChild(messageElement);
+    append_msg = messageWrapper
+  }
+
   else {
 
     console.error("no msg_type provided!")
   }
+
+
+  // IF OUTGOING (here we can attach correct class to show it on left or right)
+  if (msg_direction == 'OUTGOING') {
+    append_msg.classList.add("message");
+
+  }
+  console.log(chatBody,"wjhatsdfsdappend_msg",append_msg)
   chatBody.appendChild(append_msg);
 
 
@@ -224,7 +324,7 @@ export function renderAuthHeader(token) {
   const header = document.createElement("header");
   const theme = localStorage.getItem('theme')
   const theme_p = JSON.parse(theme)
-  if (theme_p && theme_p.header_theme){
+  if (theme_p && theme_p.header_theme) {
     //override css here...
     header.style.backgroundColor = theme_p.header_theme['backgroundColor']
 
@@ -360,7 +460,7 @@ function checkViewportSize() {
   }
 }
 
-export function setUp(app_name, api_key,theme=null) {
+export function setUp(app_name, api_key, theme = null) {
   try {
     if (!app_name || !api_key) {
       throw new Error("App name or API key is missing.");
@@ -368,26 +468,26 @@ export function setUp(app_name, api_key,theme=null) {
     localStorage.setItem("tezkit_app_name", app_name);
     localStorage.setItem("tezkit_api_key", api_key);
     let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-    if (!tezkit_msgs_data){
-      const initial_msgs_data_str = JSON.stringify({"api_key":api_key,msgs:[]})
+    if (!tezkit_msgs_data) {
+      const initial_msgs_data_str = JSON.stringify({ "api_key": api_key, msgs: [] })
       localStorage.setItem("tezkit_msgs_data", initial_msgs_data_str);
     }
-    else{
+    else {
       tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-      if (tezkit_msgs_data['api_key'] !== api_key){
+      if (tezkit_msgs_data['api_key'] !== api_key) {
         // console.error("Api Key did not match; Should probably logout and login back.")
         renderErrorPopup(["Api Key did not match; Should probably logout and login back."])
-        
+
       }
-      
+
     }
 
-    if (theme){
-  
-      localStorage.setItem('theme',theme)
-   }
-  
-   initialize()
+    if (theme) {
+
+      localStorage.setItem('theme', theme)
+    }
+
+    initialize()
 
 
   } catch (error) {
@@ -445,15 +545,15 @@ function renderErrorPopup(err_msgs) {
   const errorList = document.createElement("ul");
 
   // Assume `data.errors` contains the list of errors (adjust accordingly)
-  if (err_msgs){
+  if (err_msgs) {
     err_msgs.forEach((error) => {
       const listItem = document.createElement("li");
       listItem.textContent = error;
       errorList.appendChild(listItem);
     });
-  
+
     errorPopup.appendChild(errorList);
-  
+
     // Append close button
     const closeButton = document.createElement("button");
     closeButton.textContent = "Close";
@@ -464,20 +564,34 @@ function renderErrorPopup(err_msgs) {
     closeButton.style.padding = "5px 10px";
     closeButton.style.cursor = "pointer";
     closeButton.style.borderRadius = "3px";
-  
+
     closeButton.addEventListener("click", () => {
       errorPopup.remove();
     });
-  
+
     errorPopup.appendChild(closeButton);
-  
+
     // Prepend the error popup to the document body
     document.body.prepend(errorPopup);
   }
-  else{
+  else {
     console.error("no error still error pop up was tried to open, Contact Admin")
   }
-  
+
+}
+
+function addNewMsgToLS(p_data) {
+  const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
+
+  //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
+  const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)
+  console.log("wht is it @ reoload", tezkit_msgs_p_data)
+  // const prv_msgs_ls = tezkit_msgs_p_data
+  tezkit_msgs_p_data.msgs.push(p_data)
+
+  const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
+  localStorage.setItem("tezkit_msgs_data", prv_msg_data_string_ls);
+
 }
 
 // Function to add a full-width header with a fixed height and red background color
@@ -494,26 +608,26 @@ export function initialize(loggedInUser) {
     //HERE WE CAN PROBABLY LOAD THE CHATS FROM LS
     const tezkit_app_p_data = JSON.parse(tezkit_app_data)
 
-    console.log("are you here?",tezkit_app_p_data.auth_key)
-    
+    console.log("are you here?", tezkit_app_p_data.auth_key)
+
     let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-    
+
     //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
-    const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)  
-    if (tezkit_app_p_data.auth_key != tezkit_msgs_p_data.api_key){
+    const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)
+    if (tezkit_app_p_data.auth_key != tezkit_msgs_p_data.api_key) {
       console.error("Key did not seem to match, Please logout and login back")
     }
-    else{
+    else {
       const prv_msgs_ls = tezkit_msgs_p_data
 
-      console.log(prv_msgs_ls, "here we can insert it to the bucket",typeof(prv_msgs_ls.msgs),prv_msgs_ls.msgs)
+      console.log(prv_msgs_ls, "here we can insert it to the bucket", typeof (prv_msgs_ls.msgs), prv_msgs_ls.msgs)
       const p_msgs = prv_msgs_ls.msgs
       global_bucket.unread_msgs.push(...p_msgs)
-    }     
- 
-    
-    
-    
+    }
+
+
+
+
     // if (tex)
 
 
@@ -572,7 +686,7 @@ export function initialize(loggedInUser) {
 
 
 
-    } 
+    }
 
 
   }
@@ -605,27 +719,17 @@ export function initialize(loggedInUser) {
         socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
-
-          console.log("when message arrives! lets raise an error?", data)
-          
-          const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-
-          //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
-          const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
-          console.log("wht is it @ reoload",tezkit_msgs_p_data)   
-          // const prv_msgs_ls = tezkit_msgs_p_data
           const p_data = JSON.parse(data)
-          tezkit_msgs_p_data.msgs.push(p_data)
-          
-          const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
-          localStorage.setItem("tezkit_msgs_data",prv_msg_data_string_ls);
 
-          console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
+          console.log("when message arrives! lets raise an error?", p_data)
 
+
+          // console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
+          console.log("watasdfsdfs",p_data)
           socket.emit("ON_MESSAGE_STATUS_CHANGED", {
             action: "MSG_STATUS_CHANGE_EVENT",
-            msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-            room: "global_for__" + p_data.message.frm_user.id,
+            msg_id: p_data.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
+            room: "global_for__" + p_data.frm_user.id,
             message: "DELIVERED",
             timestamp: new Date().toLocaleTimeString(),
           });
@@ -636,18 +740,20 @@ export function initialize(loggedInUser) {
           // const sd = JSON.parse(data)
           // const msg = p_data["message"]["message"];
           // const timestamp = p_data["message"]["timestamp"];
-          const assigned_msg_id = p_data.message.assigned_msg_id
+          // const assigned_msg_id = p_data.message.assigned_msg_id
 
           if (chat_modal_open) {
             console.log("is there anything yet stored in the global_bucket", global_bucket)
-            const msg = p_data["message"]["message"];
-            const timestamp = p_data["message"]["timestamp"];
-            addNewElementToChatBody({ msg, timestamp });
-            informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
+            // const msg = p_data["message"]["message"];
+            // const timestamp = p_data["message"]["timestamp"];
+            addNewElementToChatBody(p_data);
+            // addNewMsgToLS(p_data)
+            console.log("why the hell are you doing this :)",p_data)
+            informPeerSysAboutMsgStatus(socket, p_data.assigned_msg_id)
           } else {
             console.log("arewe atleasthere", global_bucket)
 
-            console.log("whats the diff",p_data)
+            console.log("whats the diff", p_data)
             global_bucket.unread_msgs.push(p_data);
           }
         });
@@ -665,7 +771,7 @@ export function initialize(loggedInUser) {
 
         // Main socket event handler
         socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-          console.log("wathier is it",data)
+          console.log("wathier is it", data)
           const p_data = JSON.parse(data);
           console.log("Received status change:", p_data);
 
@@ -718,9 +824,9 @@ export function initialize(loggedInUser) {
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
           console.log("some file it seeems was uploaded?", data, typeof (data));
-          delete data.result.message;
+          // delete data.result.message;
 
-          renderMessage(data, 'FILE_MIXED');
+          addNewElementToChatBody(data, 'FILE_MIXED');
 
 
 
@@ -730,7 +836,7 @@ export function initialize(loggedInUser) {
     }
 
 
-   
+
 
     // Function to update the reaction
     function updateMessageReaction(messageElement, reaction) {
@@ -905,10 +1011,10 @@ export function initialize(loggedInUser) {
 
   const theme = localStorage.getItem('theme')
   const theme_p = JSON.parse(theme)
-  console.log("what is this theme here?",theme)
-  if (theme_p && theme_p.chat_opener_theme){
+  console.log("what is this theme here?", theme)
+  if (theme_p && theme_p.chat_opener_theme) {
     //override css here...
-    chat_modal_container.style.backgroundColor = theme_p.chat_opener_theme['backgroundColor'] 
+    chat_modal_container.style.backgroundColor = theme_p.chat_opener_theme['backgroundColor']
 
   }
 
@@ -936,7 +1042,7 @@ export function initialize(loggedInUser) {
       // const p_data = global_bucket.unread_msgs[0]
 
       global_bucket.unread_msgs.forEach(p_data => {
-        console.log("what is this after relaod?",p_data)
+        console.log("what is this after relaod?", p_data)
         updateNotificationBell(tezkit_app_data)
         const msg = p_data["message"]["message"]
         const timestamp = p_data["message"]["timestamp"];
@@ -976,8 +1082,9 @@ export function initialize(loggedInUser) {
     return `<div class="reaction">${reaction}</div>`;
   }
 
-
+  // THIS IS A LEGACY FUCNTION WILL RMOVE IT SOON
   function renderMessage(newMessage, type = 'REGULAR') {
+    console.log("this is when the msg is sent??", newMessage)
     if (newMessage) {
       if (type === 'REGULAR') {
         const messageWrapper = document.createElement("div");
@@ -985,13 +1092,13 @@ export function initialize(loggedInUser) {
 
         const messageElement = document.createElement("div");
         messageElement.classList.add("message");
-        messageElement.classList.add(newMessage.sender || "de");
+        // messageElement.classList.add(newMessage.sender || "de");
 
         const reactionHtml = renderReaction(newMessage.reaction);
 
         messageElement.innerHTML = `
-          <p>${newMessage.text}</p>
-          <span class="time">${newMessage.time}</span>
+          <p>${newMessage.msg}</p>
+          <span class="timestamp">${newMessage.timestamp}</span>
           ${reactionHtml}
         `;
 
@@ -1022,8 +1129,8 @@ export function initialize(loggedInUser) {
         // Handling text content
         let textHtml = '';
         if (newMessage.result.sometext_data && newMessage.result.sometext_data.length > 0) {
-          textHtml = JSON.parse(newMessage.result.sometext_data).map(text => {
-            return `<p>${text}</p>`;
+          textHtml = JSON.parse(newMessage.result.sometext_data).map(msg => {
+            return `<p>${msg}</p>`;
           }).join("");
         }
 
@@ -1033,7 +1140,7 @@ export function initialize(loggedInUser) {
             ${filesHtml}
             ${textHtml}
           </div>
-          <span class="time">${new Date().toLocaleTimeString()}</span>
+          <span class="timestamp">${new Date().toLocaleTimeString()}</span>
         `;
 
         console.log("Rendering FILE_MIXED message:", messageElement);
@@ -1054,36 +1161,39 @@ export function initialize(loggedInUser) {
       let new_rply_msg_obj = {
         // "type": "reply",
         room: "global_for__1",
-        message: chatInput.value,
-        timestamp: new Date().toLocaleTimeString(),
-        frm_user: {
-          id: loggedInUser[identifiers["name_idn"]],
-          // user: loggedInUser.full_name,
-        },
-        to_user: {
-          id: 1,
-          user: "Admin",
-        },
+        message: {
+          message: chatInput.value,
+          timestamp: new Date().toLocaleTimeString(),
+          frm_user: {
+            id: loggedInUser[identifiers["name_idn"]],
+            // user: loggedInUser.full_name,
+          },
+          to_user: {
+            id: 1,
+            user: "Admin",
+          }
+        }
       };
 
 
       const messageText = chatInput.value;
       if (messageText.trim() !== "") {
-        const newMessage = {
-          text: messageText,
-          sender: "user",
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
+        // const newMessage = {
+        //   msg: messageText,
+        //   // sender: "user",
+        //   timestamp: new Date().toLocaleTimeString([], {
+        //     hour: "2-digit",
+        //     minute: "2-digit",
+        //   }),
+        // };
 
 
-        console.log("w atis thsi", loggedInUser);
+        console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
 
-        messages.push(newMessage);
-        renderMessage(newMessage);
+        messages.push(new_rply_msg_obj.message);
+        // addNewMsgToLS(newMessage)
+        addNewElementToChatBody(new_rply_msg_obj.message, 'REGULAR', 'OUTGOING');
         chatInput.value = "";
         chatBody.scrollTop = chatBody.scrollHeight;
       }
@@ -1092,8 +1202,7 @@ export function initialize(loggedInUser) {
     }
   });
 
-  // Initial rendering of messages
-  // renderMessage(null);
+
 
   document.body.appendChild(chat_modal);
 }
