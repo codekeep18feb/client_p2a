@@ -208,6 +208,55 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR', msg_direction = "INC
     append_msg = new_messageElement
 
   }
+  if (msg_type == 'REPLY') {
+    // console.log("is it going frm here?", obj)
+    // const new_messageElement = document.createElement("div");
+    // new_messageElement.classList.add("message");
+    // new_messageElement.classList.add("admin");
+    // new_messageElement.innerHTML = `
+    //       <div>
+    //       <p>${obj.message.message}</p>
+    //       <span class="timestamp">${obj.message.timestamp}</span>
+    //       </div>
+    //   `;
+    // append_msg = new_messageElement
+
+
+    console.log("renderReplyMessage with replyMsg:", obj);
+
+      console.log("originalMessageText:", obj.message.to_msg.msg);
+
+      // const chatBody = document.getElementById("chatBody");
+      const replyWrapper = document.createElement("div");
+      replyWrapper.classList.add("message", "admin");
+
+      const replyElement = document.createElement("div");
+      replyElement.classList.add("reply-message");
+
+
+      // const originalText = originalMessageText.querySelector("p").textContent;
+      console.log("originalText msg",obj.message.to_msg.msg)
+
+      // const replyText = obj.message;
+
+      // console.log("replyText msg",replyText)
+      const replyTime = obj.message.timestamp|| new Date().toLocaleTimeString(); 
+
+      replyElement.innerHTML = `
+        <div class="original-message">
+          <p>${obj.message.to_msg.msg}</p>
+        </div>
+        <div class="reply-content">
+          <p>${obj.message.message}</p>
+          <span class="time">${replyTime}</span>
+        </div>
+      `;
+
+      console.log("reply message with original message", replyElement);
+      replyWrapper.appendChild(replyElement);
+      append_msg = replyWrapper
+
+  }
 
 
   else if (msg_type === 'FILE_MIXED') {
@@ -219,9 +268,10 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR', msg_direction = "INC
     // messageElement.classList.add(obj.to_user.id || "de");
 
     // Handling files, showing them directly as images
+    console.log("objsdsdfobj",obj)
     let filesHtml = '';
-    if (obj.result.files && obj.result.files.length > 0) {
-      filesHtml = obj.result.files.map(fileUrl => {
+    if (obj.message.result.files && obj.message.result.files.length > 0) {
+      filesHtml = obj.message.result.files.map(fileUrl => {
 
         // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
         return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
@@ -230,8 +280,8 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR', msg_direction = "INC
 
     // Handling text content
     let textHtml = '';
-    if (obj.result.sometext_data && obj.result.sometext_data.length > 0) {
-      textHtml = JSON.parse(obj.result.sometext_data).map(msg => {
+    if (obj.message.result.sometext_data && obj.message.result.sometext_data.length > 0) {
+      textHtml = JSON.parse(obj.message.result.sometext_data).map(msg => {
         return `<p>${msg}</p>`;
       }).join("");
     }
@@ -264,6 +314,7 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR', msg_direction = "INC
     append_msg.classList.add("message");
 
   }
+  console.log(chatBody,"wjhatsdfsdappend_msg",append_msg)
   chatBody.appendChild(append_msg);
 
 
@@ -697,6 +748,7 @@ export function initialize(loggedInUser) {
             // const timestamp = p_data["message"]["timestamp"];
             addNewElementToChatBody(p_data);
             // addNewMsgToLS(p_data)
+            console.log("why the hell are you doing this :)",p_data)
             informPeerSysAboutMsgStatus(socket, p_data.assigned_msg_id)
           } else {
             console.log("arewe atleasthere", global_bucket)
@@ -772,7 +824,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
           console.log("some file it seeems was uploaded?", data, typeof (data));
-          delete data.result.message;
+          // delete data.result.message;
 
           addNewElementToChatBody(data, 'FILE_MIXED');
 
@@ -1139,9 +1191,9 @@ export function initialize(loggedInUser) {
         console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
 
-        messages.push(new_rply_msg_obj);
+        messages.push(new_rply_msg_obj.message);
         // addNewMsgToLS(newMessage)
-        addNewElementToChatBody(new_rply_msg_obj, 'REGULAR', 'OUTGOING');
+        addNewElementToChatBody(new_rply_msg_obj.message, 'REGULAR', 'OUTGOING');
         chatInput.value = "";
         chatBody.scrollTop = chatBody.scrollHeight;
       }
