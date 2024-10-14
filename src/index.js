@@ -195,19 +195,56 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
 
   let append_msg = null
   if (msg_type == 'REGULAR') {
+    console.log("wahtidfsda",obj)
     const new_messageElement = document.createElement("div");
     new_messageElement.classList.add("message");
     new_messageElement.classList.add("admin");
     new_messageElement.innerHTML = `
           <div>
-          <p>${obj.msg}</p>
-          <span class="timestamp">${obj.timestamp}</span>
+          <p>${obj.message.message}</p>
+          <span class="timestamp">${obj.message.timestamp}</span>
           </div>
       `;
     append_msg = new_messageElement
 
   }
+  if (msg_type == 'REPLY') {
 
+    console.log("renderReplyMessage with replyMsg:", obj);
+
+      console.log("originalMessageText:", obj.message.to_msg.msg);
+
+      // const chatBody = document.getElementById("chatBody");
+      const replyWrapper = document.createElement("div");
+      replyWrapper.classList.add("message", "admin");
+
+      const replyElement = document.createElement("div");
+      replyElement.classList.add("reply-message");
+
+
+      // const originalText = originalMessageText.querySelector("p").textContent;
+      console.log("originalText msg",obj.message.to_msg.msg)
+
+      // const replyText = obj.message;
+
+      // console.log("replyText msg",replyText)
+      const replyTime = obj.message.timestamp|| new Date().toLocaleTimeString(); 
+
+      replyElement.innerHTML = `
+        <div class="original-message">
+          <p>${obj.message.to_msg.msg}</p>
+        </div>
+        <div class="reply-content">
+          <p>${obj.message.message}</p>
+          <span class="time">${replyTime}</span>
+        </div>
+      `;
+
+      console.log("reply message with original message", replyElement);
+      replyWrapper.appendChild(replyElement);
+      append_msg = replyWrapper
+
+  }
 
   else if (msg_type === 'FILE_MIXED') {
     const messageWrapper = document.createElement("div");
@@ -219,8 +256,9 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
 
     // Handling files, showing them directly as images
     let filesHtml = '';
-    if (obj.result.files && obj.result.files.length > 0) {
-      filesHtml = obj.result.files.map(fileUrl => {
+    console.log("objdsfsdf",obj)
+    if (obj.message.result.files && obj.message.result.files.length > 0) {
+      filesHtml = obj.message.result.files.map(fileUrl => {
 
         // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
         return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
@@ -229,8 +267,8 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
 
     // Handling text content
     let textHtml = '';
-    if (obj.result.sometext_data && obj.result.sometext_data.length > 0) {
-      textHtml = JSON.parse(obj.result.sometext_data).map(msg => {
+    if (obj.message.result.sometext_data && obj.message.result.sometext_data.length > 0) {
+      textHtml = JSON.parse(obj.message.result.sometext_data).map(msg => {
         return `<p>${msg}</p>`;
       }).join("");
     }
@@ -452,12 +490,12 @@ function updateNotificationBell(tezkit_app_data) {
   }
 }
 
-function informPeerSysAboutMsgStatus(socket, assigned_msg_id) {
+function informPeerSysAboutMsgStatus(socket, msg_id, status='DELIVERED') {
   socket.emit("ON_MESSAGE_STATUS_CHANGED", {
     action: "MSG_STATUS_CHANGE_EVENT",
-    msg_id: assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
+    msg_id: msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
     room: "global_for__1",
-    message: "READ",
+    status: status,
     timestamp: new Date().toLocaleTimeString(),
   });
 }
@@ -647,48 +685,29 @@ export function initialize(loggedInUser) {
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
 
-          console.log("when message arrives! lets raise an error?", data)
-          
           const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-
           //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
           const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
-          console.log("wht is it @ reoload",tezkit_msgs_p_data)   
-          // const prv_msgs_ls = tezkit_msgs_p_data
           const p_data = JSON.parse(data)
           tezkit_msgs_p_data.msgs.push(p_data)
-          
-          const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
-          localStorage.setItem("tezkit_msgs_data",prv_msg_data_string_ls);
 
-          console.log("are we getting data just fine!p_data.message.frm_user.id", p_data);
 
-          socket.emit("ON_MESSAGE_STATUS_CHANGED", {
-            action: "MSG_STATUS_CHANGE_EVENT",
-            msg_id: p_data.message.assigned_msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
-            room: "global_for__" + p_data.message.frm_user.id,
-            message: "DELIVERED",
-            timestamp: new Date().toLocaleTimeString(),
-          });
+   
+          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
+
 
           // update notifications bell
           updateNotificationBell(tezkit_app_data)
 
-          // const sd = JSON.parse(data)
-          // const msg = p_data["message"]["message"];
-          // const timestamp = p_data["message"]["timestamp"];
-          // const assigned_msg_id = p_data.message.assigned_msg_id
 
           if (chat_modal_open) {
-            console.log("is there anything yet stored in the global_bucket", global_bucket)
+            console.log("is there anything yet stored in the global_bucket", p_data)
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
-            addNewElementToChatBody({ msg, timestamp });
-            informPeerSysAboutMsgStatus(socket, p_data["message"]["assigned_msg_id"])
+            addNewElementToChatBody(p_data);
+            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ")
           } else {
-            console.log("arewe atleasthere", global_bucket)
-
-            console.log("whats the diff",p_data)
+            //SAVE IT INTO THE BUCKET
             global_bucket.unread_msgs.push(p_data);
           }
         });
@@ -700,7 +719,22 @@ export function initialize(loggedInUser) {
           const p_data = JSON.parse(data);
           console.log("reply msg data", p_data);
 
-          addNewElementToChatBody(p_data, "REPLY");
+          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
+          
+          updateNotificationBell(tezkit_app_data)
+
+
+
+          if (chat_modal_open) {
+            console.log("is there anything yet stored in the global_bucket", p_data)
+            const msg = p_data["message"]["message"];
+            const timestamp = p_data["message"]["timestamp"];
+            addNewElementToChatBody(p_data, 'REPLY');
+            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ")
+          } else {
+            //SAVE IT INTO THE BUCKET
+            global_bucket.unread_msgs.push(p_data);
+          }
         })
 
 
@@ -759,7 +793,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
           console.log("some file it seeems was uploaded?", data, typeof (data));
-          delete data.result.message;
+          delete data.message.result.message;
 
           addNewElementToChatBody(data, 'FILE_MIXED');
 
@@ -981,10 +1015,10 @@ export function initialize(loggedInUser) {
         updateNotificationBell(tezkit_app_data)
         const msg = p_data["message"]["message"]
         const timestamp = p_data["message"]["timestamp"];
-        const assigned_msg_id = p_data["message"]["assigned_msg_id"]
+        const msg_id = p_data["message"]["msg_id"]
 
-        addNewElementToChatBody({ msg, timestamp });
-        informPeerSysAboutMsgStatus(socket, assigned_msg_id)
+        addNewElementToChatBody(p_data);
+        informPeerSysAboutMsgStatus(socket, msg_id, "READ")
       });
       global_bucket.unread_msgs = []
 
@@ -1096,16 +1130,18 @@ export function initialize(loggedInUser) {
       let new_rply_msg_obj = {
         // "type": "reply",
         room: "global_for__1",
-        message: chatInput.value,
-        timestamp: new Date().toLocaleTimeString(),
-        frm_user: {
-          id: loggedInUser[identifiers["name_idn"]],
-          // user: loggedInUser.full_name,
-        },
-        to_user: {
-          id: 1,
-          user: "Admin",
-        },
+        message:{
+          message: chatInput.value,
+          timestamp: new Date().toLocaleTimeString(),
+          frm_user: {
+            id: loggedInUser[identifiers["name_idn"]],
+            // user: loggedInUser.full_name,
+          },
+          to_user: {
+            id: 1,
+            user: "Admin",
+          },
+        }
       };
 
 

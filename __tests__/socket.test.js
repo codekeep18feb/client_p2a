@@ -88,7 +88,7 @@ describe('Socket Tests', () => {
     if (mockSocket['ON_MESSAGE_ARRIVAL_BOT']) {
       const payload = {
         "message": {
-          "assigned_msg_id": "msg_id__1",
+          "msg_id": "msg_id__1",
           "frm_user":{"id":1},
           "message": "sdfsadf",
           "status": "SENT",
@@ -117,7 +117,7 @@ describe('Socket Tests', () => {
       const payload = {
         "message": {
           "action":null,
-          "assigned_msg_id": "msg_id__1",
+          "msg_id": "msg_id__1",
           "frm_user":{"id":1},
           "message": "sdfsadf",
           "status": "SENT",
@@ -188,7 +188,7 @@ describe('Socket Tests', () => {
 //     if (mockSocket['ON_MESSAGE_ARRIVAL_BOT']) {
 //       const payload = {
 //         "message": {
-//           "assigned_msg_id": "msg_id__1",
+//           "msg_id": "msg_id__1",
 //           "message": "sdfsadf",
 //           "status": "SENT",
 //           "timestamp": "23:30:21",
