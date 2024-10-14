@@ -684,7 +684,6 @@ export function initialize(loggedInUser) {
         socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
-
           const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
           //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
           const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
@@ -692,7 +691,7 @@ export function initialize(loggedInUser) {
           tezkit_msgs_p_data.msgs.push(p_data)
 
 
-   
+          console.log("got ta msg",p_data)   
           informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
 
 
@@ -738,25 +737,25 @@ export function initialize(loggedInUser) {
         })
 
 
-        // Main socket event handler
-        socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-          console.log("wathier is it",data)
-          const p_data = JSON.parse(data);
-          console.log("Received status change:", p_data);
+        // // Main socket event handler
+        // socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
+        //   console.log("wathier is it",data)
+        //   const p_data = JSON.parse(data);
+        //   console.log("Received status change:", p_data);
 
-          if (!p_data.message.action) {
-            console.error("No action provided!");
-            return;
-          }
+        //   if (!p_data.message.action) {
+        //     console.error("No action provided!");
+        //     return;
+        //   }
 
-          if (p_data.message.action === "MSG_UPDATED_EVENT") {
-            handleMsgUpdatedEvent(p_data);
-          } else if (p_data.message.action === "MSG_REACTION_EVENT") {
-            handleMsgReactionEvent(p_data);
-          } else {
-            console.error("Action Not Yet Handled:", p_data.message.action);
-          }
-        });
+        //   if (p_data.message.action === "MSG_UPDATED_EVENT") {
+        //     handleMsgUpdatedEvent(p_data);
+        //   } else if (p_data.message.action === "MSG_REACTION_EVENT") {
+        //     handleMsgReactionEvent(p_data);
+        //   } else {
+        //     console.error("Action Not Yet Handled:", p_data.message.action);
+        //   }
+        // });
 
 
 
@@ -792,10 +791,32 @@ export function initialize(loggedInUser) {
 
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
-          console.log("some file it seeems was uploaded?", data, typeof (data));
-          delete data.message.result.message;
 
-          addNewElementToChatBody(data, 'FILE_MIXED');
+          console.log("some file it seeems was upload p_data.message.msg_id ed?", data, typeof (data));
+          // delete data.message.result.message;
+
+          // const p_data = JSON.parse(data);
+          console.log("upload msg data", data);
+
+          informPeerSysAboutMsgStatus(socket, data.message.msg_id)
+          
+          updateNotificationBell(tezkit_app_data)
+
+
+
+          if (chat_modal_open) {
+            console.log("is there anything yet stored in the global_bucket", data)
+            // const msg = p_data["message"]["message"];
+            // const timestamp = p_data["message"]["timestamp"];
+  
+            addNewElementToChatBody(data, 'FILE_MIXED');
+  
+  
+            informPeerSysAboutMsgStatus(socket, data.message.msg_id, "READ")
+          } else {
+            //SAVE IT INTO THE BUCKET
+            global_bucket.unread_msgs.push(data);
+          }
 
 
 
