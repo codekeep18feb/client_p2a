@@ -559,6 +559,16 @@ function renderErrorPopup(err_msgs) {
   
 }
 
+
+function addToMsgsLs(p_data) {
+  const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
+  //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
+  const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
+  tezkit_msgs_p_data.msgs.push(p_data)
+  const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
+  localStorage.setItem("tezkit_msgs_data",prv_msg_data_string_ls);
+}
+
 // Function to add a full-width header with a fixed height and red background color
 export function initialize(loggedInUser) {
   console.log("here iteste for tests???", loggedInUser)
@@ -684,11 +694,9 @@ export function initialize(loggedInUser) {
         socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
-          const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-          //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
-          const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
-          const p_data = JSON.parse(data)
-          tezkit_msgs_p_data.msgs.push(p_data)
+        const  p_data= JSON.parse(data)
+          
+          addToMsgsLs(p_data)
 
 
           console.log("got ta msg",p_data)   
@@ -716,6 +724,8 @@ export function initialize(loggedInUser) {
           console.log("Reply Recieved!", data)
 
           const p_data = JSON.parse(data);
+          addToMsgsLs(p_data)
+
           console.log("reply msg data", p_data);
 
           informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
@@ -737,25 +747,25 @@ export function initialize(loggedInUser) {
         })
 
 
-        // // Main socket event handler
-        // socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-        //   console.log("wathier is it",data)
-        //   const p_data = JSON.parse(data);
-        //   console.log("Received status change:", p_data);
+        // Main socket event handler
+        socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
+          console.log("wathier is it",data)
+          const p_data = JSON.parse(data);
+          console.log("Received status change:", p_data);
 
-        //   if (!p_data.message.action) {
-        //     console.error("No action provided!");
-        //     return;
-        //   }
+          if (!p_data.message.action) {
+            console.error("No action provided!");
+            return;
+          }
 
-        //   if (p_data.message.action === "MSG_UPDATED_EVENT") {
-        //     handleMsgUpdatedEvent(p_data);
-        //   } else if (p_data.message.action === "MSG_REACTION_EVENT") {
-        //     handleMsgReactionEvent(p_data);
-        //   } else {
-        //     console.error("Action Not Yet Handled:", p_data.message.action);
-        //   }
-        // });
+          if (p_data.message.action === "MSG_UPDATED_EVENT") {
+            handleMsgUpdatedEvent(p_data);
+          } else if (p_data.message.action === "MSG_REACTION_EVENT") {
+            handleMsgReactionEvent(p_data);
+          } else {
+            console.error("Action Not Yet Handled:", p_data.message.action);
+          }
+        });
 
 
 
@@ -791,6 +801,8 @@ export function initialize(loggedInUser) {
 
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
+
+          addToMsgsLs(data)
 
           console.log("some file it seeems was upload p_data.message.msg_id ed?", data, typeof (data));
           // delete data.message.result.message;
@@ -1180,6 +1192,8 @@ export function initialize(loggedInUser) {
 
         console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
+        addToMsgsLs(new_rply_msg_obj)
+
 
         messages.push(newMessage);
         renderMessage(newMessage);
