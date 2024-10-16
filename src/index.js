@@ -289,7 +289,6 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
     messageWrapper.appendChild(messageElement);
     append_msg = messageWrapper
   }
-
   else {
 
     console.error("no msg_type provided!")
@@ -362,7 +361,6 @@ export function renderAuthHeader(token) {
 
   if (token) {
     const logoutButton = createButtonComp("Logout", () => {
-
       // Logout here
       localStorage.removeItem("tezkit_token");
       // Reload the page
@@ -732,7 +730,6 @@ export function initialize(loggedInUser) {
           console.log("reply msg data", p_data);
 
           informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
-
           updateNotificationBell(tezkit_app_data)
 
 
@@ -814,7 +811,6 @@ export function initialize(loggedInUser) {
           console.log("upload msg data", data);
 
           informPeerSysAboutMsgStatus(socket, data.message.msg_id)
-
           updateNotificationBell(tezkit_app_data)
 
 
@@ -839,7 +835,6 @@ export function initialize(loggedInUser) {
 
       }
     }
-
 
 
 
