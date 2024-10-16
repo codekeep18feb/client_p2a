@@ -3,9 +3,8 @@
 
 // Import the CSS file
 import "./style.css";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 import myImage from "./tezkit_logo.jpg";
-
 
 // const APP_NAME = "app1_t2" // this should technically be fetched by credentials??
 
@@ -14,10 +13,9 @@ export { global_bucket };
 
 // let user_msgs = []
 
-const identifiers = {}
+const identifiers = {};
 
-
-let chat_modal_open = false
+let chat_modal_open = false;
 export { chat_modal_open };
 
 function updateMessageText(messageElement, newText) {
@@ -29,7 +27,6 @@ function updateMessageText(messageElement, newText) {
     console.error("Message text element not found.");
   }
 }
-
 
 function incrementNotificationsCount() {
   const notification_num_div = document.getElementById("notification_num");
@@ -53,9 +50,8 @@ function getMessageElement(index, chatBody) {
   }
 }
 
-
 function newReplyHandler(p_data) {
-  console.log("here prepare the data for the rest of the code .", p_data)
+  console.log("here prepare the data for the rest of the code .", p_data);
   const { msg_id, message } = p_data;
   console.log("Extracted msg_id:", msg_id);
   const replyMsg = message;
@@ -68,13 +64,11 @@ function newReplyHandler(p_data) {
   const replyElement = document.createElement("div");
   replyElement.classList.add("reply-message");
 
-
-
   const replyText = replyMsg;
 
-  console.log("replyText msg", replyText)
+  console.log("replyText msg", replyText);
   const replyTime = p_data.timestamp || new Date().toLocaleTimeString();
-  const originalMsg = p_data.to_msg.msg
+  const originalMsg = p_data.to_msg.msg;
   replyElement.innerHTML = `
     <div class="original-message">
       <p>${originalMsg}</p>
@@ -87,10 +81,8 @@ function newReplyHandler(p_data) {
 
   console.log("reply message with original message", replyElement);
   replyWrapper.appendChild(replyElement);
-  return replyWrapper
+  return replyWrapper;
 }
-
-
 
 // Function to change the background color of the body
 export function changeBackgroundColor() {
@@ -190,12 +182,12 @@ export function renderCustomizeComponent() {
 
 let socket;
 
-function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
-  console.log("this is when the msg is reieved??",obj)
+function addNewElementToChatBody(obj, msg_type = "REGULAR") {
+  console.log("this is when the msg is reieved??", obj);
 
-  let append_msg = null
-  if (msg_type == 'REGULAR') {
-    console.log("wahtidfsda",obj)
+  let append_msg = null;
+  if (msg_type == "REGULAR") {
+    console.log("wahtidfsda", obj);
     const new_messageElement = document.createElement("div");
     new_messageElement.classList.add("message");
     new_messageElement.classList.add("admin");
@@ -205,32 +197,29 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
           <span class="timestamp">${obj.message.timestamp}</span>
           </div>
       `;
-    append_msg = new_messageElement
-
+    append_msg = new_messageElement;
   }
-  if (msg_type == 'REPLY') {
-
+  if (msg_type == "REPLY") {
     console.log("renderReplyMessage with replyMsg:", obj);
 
-      console.log("originalMessageText:", obj.message.to_msg.msg);
+    console.log("originalMessageText:", obj.message.to_msg.msg);
 
-      // const chatBody = document.getElementById("chatBody");
-      const replyWrapper = document.createElement("div");
-      replyWrapper.classList.add("message", "admin");
+    // const chatBody = document.getElementById("chatBody");
+    const replyWrapper = document.createElement("div");
+    replyWrapper.classList.add("message", "admin");
 
-      const replyElement = document.createElement("div");
-      replyElement.classList.add("reply-message");
+    const replyElement = document.createElement("div");
+    replyElement.classList.add("reply-message");
 
+    // const originalText = originalMessageText.querySelector("p").textContent;
+    console.log("originalText msg", obj.message.to_msg.msg);
 
-      // const originalText = originalMessageText.querySelector("p").textContent;
-      console.log("originalText msg",obj.message.to_msg.msg)
+    // const replyText = obj.message;
 
-      // const replyText = obj.message;
+    // console.log("replyText msg",replyText)
+    const replyTime = obj.message.timestamp || new Date().toLocaleTimeString();
 
-      // console.log("replyText msg",replyText)
-      const replyTime = obj.message.timestamp|| new Date().toLocaleTimeString(); 
-
-      replyElement.innerHTML = `
+    replyElement.innerHTML = `
         <div class="original-message">
           <p>${obj.message.to_msg.msg}</p>
         </div>
@@ -240,13 +229,10 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
         </div>
       `;
 
-      console.log("reply message with original message", replyElement);
-      replyWrapper.appendChild(replyElement);
-      append_msg = replyWrapper
-
-  }
-
-  else if (msg_type === 'FILE_MIXED') {
+    console.log("reply message with original message", replyElement);
+    replyWrapper.appendChild(replyElement);
+    append_msg = replyWrapper;
+  } else if (msg_type === "FILE_MIXED") {
     const messageWrapper = document.createElement("div");
     messageWrapper.classList.add("message-container");
 
@@ -255,22 +241,28 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
     // messageElement.classList.add(obj.to_user.id || "de");
 
     // Handling files, showing them directly as images
-    let filesHtml = '';
-    console.log("objdsfsdf",obj)
+    let filesHtml = "";
+    console.log("objdsfsdf", obj);
     if (obj.message.result.files && obj.message.result.files.length > 0) {
-      filesHtml = obj.message.result.files.map(fileUrl => {
-
-        // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
-        return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
-      }).join("");
+      filesHtml = obj.message.result.files
+        .map((fileUrl) => {
+          // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
+          return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
+        })
+        .join("");
     }
 
     // Handling text content
-    let textHtml = '';
-    if (obj.message.result.sometext_data && obj.message.result.sometext_data.length > 0) {
-      textHtml = JSON.parse(obj.message.result.sometext_data).map(msg => {
-        return `<p>${msg}</p>`;
-      }).join("");
+    let textHtml = "";
+    if (
+      obj.message.result.sometext_data &&
+      obj.message.result.sometext_data.length > 0
+    ) {
+      textHtml = JSON.parse(obj.message.result.sometext_data)
+        .map((msg) => {
+          return `<p>${msg}</p>`;
+        })
+        .join("");
     }
 
     // Construct the message inner HTML
@@ -287,26 +279,20 @@ function addNewElementToChatBody(obj, msg_type = 'REGULAR') {
     // Append the new message at the bottom of chatBody
     // chatBody.appendChild(messageWrapper);
     messageWrapper.appendChild(messageElement);
-    append_msg = messageWrapper
-  }
-  
-  else {
-
-    console.error("no msg_type provided!")
+    append_msg = messageWrapper;
+  } else {
+    console.error("no msg_type provided!");
   }
   chatBody.appendChild(append_msg);
-
-
 }
 
 export function renderAuthHeader(token) {
   const header = document.createElement("header");
-  const theme = localStorage.getItem('theme')
-  const theme_p = JSON.parse(theme)
-  if (theme_p && theme_p.header_theme){
+  const theme = localStorage.getItem("theme");
+  const theme_p = JSON.parse(theme);
+  if (theme_p && theme_p.header_theme) {
     //override css here...
-    header.style.backgroundColor = theme_p.header_theme['backgroundColor']
-
+    header.style.backgroundColor = theme_p.header_theme["backgroundColor"];
   }
   header.classList.add("header");
 
@@ -331,6 +317,7 @@ export function renderAuthHeader(token) {
 
   const rightPart = document.createElement("div");
   rightPart.classList.add("right");
+  rightPart.style.border = "5px solid red";
 
   const notificationIcon = document.createElement("span");
   notificationIcon.textContent = "🔔";
@@ -374,8 +361,6 @@ export function renderAuthHeader(token) {
     chatIcon.style.cursor = "pointer";
     // chatIcon.addEventListener('click', toggleChatModal);
     // rightPart.appendChild(chatIcon);
-
-
   } else {
     const loginButton = createButtonComp("Login", () => {
       routeToLogin();
@@ -390,7 +375,7 @@ export function renderAuthHeader(token) {
 }
 
 export function handleMsgUpdatedEvent(p_data) {
-  console.log("dont tell me it was through thisfsdf?")
+  console.log("dont tell me it was through thisfsdf?");
 
   const { msg_id, message } = p_data.message;
   const msg = message;
@@ -409,9 +394,6 @@ const MOBILE_WIDTH = 768;
 
 // Function to check the viewport size
 function checkViewportSize() {
-
-
-
   // if (width < 800) {
   //   console.log("areraewr dcp,dog dfsd")
   //   chat_modal.style.display = "flex";
@@ -426,20 +408,18 @@ function checkViewportSize() {
   const chat_modal = document.getElementById("chatModal");
 
   if (window.innerWidth < MOBILE_WIDTH) {
-    console.log('Mobile size', window.innerWidth);
+    console.log("Mobile size", window.innerWidth);
     chat_modal.style.display = "flex";
-
 
     // Add your mobile-specific logic here
   } else {
-    console.log('Desktop size', window.innerWidth);
+    console.log("Desktop size", window.innerWidth);
     // Add your desktop-specific logic here
     chat_modal.style.display = "block";
-
   }
 }
 
-export function setUp(app_name, api_key,theme=null) {
+export function setUp(app_name, api_key, theme = null) {
   try {
     if (!app_name || !api_key) {
       throw new Error("App name or API key is missing.");
@@ -447,50 +427,46 @@ export function setUp(app_name, api_key,theme=null) {
     localStorage.setItem("tezkit_app_name", app_name);
     localStorage.setItem("tezkit_api_key", api_key);
     let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-    if (!tezkit_msgs_data){
-      const initial_msgs_data_str = JSON.stringify({"api_key":api_key,msgs:[]})
+    if (!tezkit_msgs_data) {
+      const initial_msgs_data_str = JSON.stringify({
+        api_key: api_key,
+        msgs: [],
+      });
       localStorage.setItem("tezkit_msgs_data", initial_msgs_data_str);
-    }
-    else{
+    } else {
       tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-      if (tezkit_msgs_data['api_key'] !== api_key){
+      if (tezkit_msgs_data["api_key"] !== api_key) {
         // console.error("Api Key did not match; Should probably logout and login back.")
-        renderErrorPopup(["Api Key did not match; Should probably logout and login back."])
-        
+        renderErrorPopup([
+          "Api Key did not match; Should probably logout and login back.",
+        ]);
       }
-      
     }
 
-    if (theme){
-  
-      localStorage.setItem('theme',theme)
-   }
-  
-   initialize()
+    if (theme) {
+      localStorage.setItem("theme", theme);
+    }
 
-
+    initialize();
   } catch (error) {
     console.error("Failed to set up localStorage:", error.message);
-    renderErrorPopup([error.message])
+    renderErrorPopup([error.message]);
     // Additional error handling logic (e.g., notify user)
   }
 }
 
-
-
 function updateNotificationBell(tezkit_app_data) {
   if (tezkit_app_data) {
-    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data);
     // console.log("here is the sdflogedddd",tezkit_app_p_data.settings.authCloudManaged===false);
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
-      incrementNotificationsCount()
-
+      incrementNotificationsCount();
     }
   }
 }
 
-function informPeerSysAboutMsgStatus(socket, msg_id, status='DELIVERED') {
+function informPeerSysAboutMsgStatus(socket, msg_id, status = "DELIVERED") {
   socket.emit("ON_MESSAGE_STATUS_CHANGED", {
     action: "MSG_STATUS_CHANGE_EVENT",
     msg_id: msg_id, // THIS WILL BE DYNAMIC IN NATURE upda
@@ -524,15 +500,15 @@ function renderErrorPopup(err_msgs) {
   const errorList = document.createElement("ul");
 
   // Assume `data.errors` contains the list of errors (adjust accordingly)
-  if (err_msgs){
+  if (err_msgs) {
     err_msgs.forEach((error) => {
       const listItem = document.createElement("li");
       listItem.textContent = error;
       errorList.appendChild(listItem);
     });
-  
+
     errorPopup.appendChild(errorList);
-  
+
     // Append close button
     const closeButton = document.createElement("button");
     closeButton.textContent = "Close";
@@ -543,107 +519,101 @@ function renderErrorPopup(err_msgs) {
     closeButton.style.padding = "5px 10px";
     closeButton.style.cursor = "pointer";
     closeButton.style.borderRadius = "3px";
-  
+
     closeButton.addEventListener("click", () => {
       errorPopup.remove();
     });
-  
+
     errorPopup.appendChild(closeButton);
-  
+
     // Prepend the error popup to the document body
     document.body.prepend(errorPopup);
+  } else {
+    console.error(
+      "no error still error pop up was tried to open, Contact Admin"
+    );
   }
-  else{
-    console.error("no error still error pop up was tried to open, Contact Admin")
-  }
-  
 }
-
 
 function addToMsgsLs(p_data) {
   const tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
   //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
-  const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)    
-  tezkit_msgs_p_data.msgs.push(p_data)
-  const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data)
-  localStorage.setItem("tezkit_msgs_data",prv_msg_data_string_ls);
+  const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data);
+  tezkit_msgs_p_data.msgs.push(p_data);
+  const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data);
+  localStorage.setItem("tezkit_msgs_data", prv_msg_data_string_ls);
 }
 
 // Function to add a full-width header with a fixed height and red background color
 export function initialize(loggedInUser) {
-  console.log("here iteste for tests???", loggedInUser)
+  console.log("here iteste for tests???", loggedInUser);
   // Attach the function to the resize event
-  window.addEventListener('resize', checkViewportSize);
+  window.addEventListener("resize", checkViewportSize);
   // socket = socket;
-  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
+  const tezkit_app_data = localStorage.getItem("tezkit_app_data");
 
   if (tezkit_app_data) {
-
-
     //HERE WE CAN PROBABLY LOAD THE CHATS FROM LS
-    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data);
 
-    console.log("are you here?",tezkit_app_p_data.auth_key)
-    
+    console.log("are you here?", tezkit_app_p_data.auth_key);
+
     let tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-    
+
     //WE CAN LATER PUT AN EXTRA CHECK FOR THE api_key match
-    const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data)  
-    if (tezkit_app_p_data.auth_key != tezkit_msgs_p_data.api_key){
-      console.error("Key did not seem to match, Please logout and login back")
+    const tezkit_msgs_p_data = JSON.parse(tezkit_msgs_data);
+    if (tezkit_app_p_data.auth_key != tezkit_msgs_p_data.api_key) {
+      console.error("Key did not seem to match, Please logout and login back");
+    } else {
+      const prv_msgs_ls = tezkit_msgs_p_data;
+
+      console.log(
+        prv_msgs_ls,
+        "here we can insert it to the bucket",
+        typeof prv_msgs_ls.msgs,
+        prv_msgs_ls.msgs
+      );
+      const p_msgs = prv_msgs_ls.msgs;
+      global_bucket.unread_msgs.push(...p_msgs);
     }
-    else{
-      const prv_msgs_ls = tezkit_msgs_p_data
 
-      console.log(prv_msgs_ls, "here we can insert it to the bucket",typeof(prv_msgs_ls.msgs),prv_msgs_ls.msgs)
-      const p_msgs = prv_msgs_ls.msgs
-      global_bucket.unread_msgs.push(...p_msgs)
-    }     
- 
-    
-    
-    
     // if (tex)
-
 
     // LET'S LOAD IT TO THE BUCKET.
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
-      identifiers["name_idn"] = "id"
+      identifiers["name_idn"] = "id";
+    } else if (tezkit_app_p_data.settings.authCloudManaged === false) {
+      identifiers["name_idn"] = "uid";
     }
-    else if (tezkit_app_p_data.settings.authCloudManaged === false) {
-      identifiers["name_idn"] = "uid"
-
-    }
-    console.log("aerwer where herever", identifiers, tezkit_app_p_data)
-
-  }
-  else {
+    console.log("aerwer where herever", identifiers, tezkit_app_p_data);
+  } else {
     const app_name = localStorage.getItem("tezkit_app_name");
-    const api_key = localStorage.getItem("tezkit_api_key")
+    const api_key = localStorage.getItem("tezkit_api_key");
 
-    console.log("arewe gonna fire this!!")
+    console.log("arewe gonna fire this!!");
     if (!app_name || !api_key) {
       console.error("app_name not provided to the client!");
-    }
-    else {
-      console.log("arerewrewrew")
+    } else {
+      console.log("arerewrewrew");
       const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
       const headersList = {
-        "Accept": "*/*",
-        "X-API-Key": api_key //THIS ONE SHOULD BE PICKED FROM index.html
+        Accept: "*/*",
+        "X-API-Key": api_key, //THIS ONE SHOULD BE PICKED FROM index.html
       };
 
       try {
         fetch(reqUrl, {
           method: "GET",
-          headers: headersList
+          headers: headersList,
         })
           .then((response) => {
             if (response.ok) {
               return response.json();
             } else {
-              console.error(`Error: ${response.status} - ${response.statusText}`);
+              console.error(
+                `Error: ${response.status} - ${response.statusText}`
+              );
             }
           })
           .then((data) => {
@@ -653,103 +623,95 @@ export function initialize(loggedInUser) {
             }
           })
           .catch((error) => {
-            console.error('Request failed:', error);
+            console.error("Request failed:", error);
           });
       } catch (error) {
-        console.error('Request failed:', error);
+        console.error("Request failed:", error);
       }
-
-
-
-    } 
-
-
+    }
   }
 
   if (loggedInUser) {
-    console.log("loggedInUserasdfasd", loggedInUser)
+    console.log("loggedInUserasdfasd", loggedInUser);
     // const io = await require('socket.io-client') // For client-side connection
 
-    socket = io("http://122.160.157.99:8022");
+    socket = io("http://122.160.157.99:8001");
     console.log("loggedInUser in initialze??");
-
-
-
-
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
 
     if (!identifiers.hasOwnProperty("name_idn")) {
       console.error("`name_idn` does not exist");
-
-    }
-    else {
+    } else {
       if (!loggedInUser.hasOwnProperty(identifiers["name_idn"])) {
         console.log(`${identifiers["name_idn"]} does not exist`);
+      } else {
+        console.log(
+          loggedInUser,
+          identifiers,
+          "user on consumer joined",
+          "global_for__" + loggedInUser[identifiers["name_idn"]]
+        );
 
-      }
-      else {
-        console.log(loggedInUser, identifiers, "user on consumer joined", "global_for__" + loggedInUser[identifiers["name_idn"]]);
-
-        socket.emit("join_room", { room: "global_for__" + loggedInUser[identifiers["name_idn"]] });
+        socket.emit("join_room", {
+          room: "global_for__" + loggedInUser[identifiers["name_idn"]],
+        });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
-        const  p_data= JSON.parse(data)
-          
-          addToMsgsLs(p_data)
+          const p_data = JSON.parse(data);
 
+          addToMsgsLs(p_data);
 
-          console.log("got ta msg",p_data)   
-          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
-
+          console.log("got ta msg", p_data);
+          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id);
 
           // update notifications bell
-          updateNotificationBell(tezkit_app_data)
-
+          updateNotificationBell(tezkit_app_data);
 
           if (chat_modal_open) {
-            console.log("is there anything yet stored in the global_bucket", p_data)
+            console.log(
+              "is there anything yet stored in the global_bucket",
+              p_data
+            );
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
             addNewElementToChatBody(p_data);
-            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ")
+            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
             //SAVE IT INTO THE BUCKET
             global_bucket.unread_msgs.push(p_data);
           }
         });
 
-
-        socket.on('ON_MESSAGE_ARRIVAL', function (data) {
-          console.log("Reply Recieved!", data)
+        socket.on("ON_MESSAGE_ARRIVAL", function (data) {
+          console.log("Reply Recieved!", data);
 
           const p_data = JSON.parse(data);
-          addToMsgsLs(p_data)
+          addToMsgsLs(p_data);
 
           console.log("reply msg data", p_data);
 
-          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id)
-          
-          updateNotificationBell(tezkit_app_data)
-
-
+          informPeerSysAboutMsgStatus(socket, p_data.message.msg_id);
+          updateNotificationBell(tezkit_app_data);
 
           if (chat_modal_open) {
-            console.log("is there anything yet stored in the global_bucket", p_data)
+            console.log(
+              "is there anything yet stored in the global_bucket",
+              p_data
+            );
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
-            addNewElementToChatBody(p_data, 'REPLY');
-            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ")
+            addNewElementToChatBody(p_data, "REPLY");
+            informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
             //SAVE IT INTO THE BUCKET
             global_bucket.unread_msgs.push(p_data);
           }
-        })
-
+        });
 
         // Main socket event handler
         socket.on("ON_MESSAGE_STATUS_CHANGED", function (data) {
-          console.log("wathier is it",data)
+          console.log("wathier is it", data);
           const p_data = JSON.parse(data);
           console.log("Received status change:", p_data);
 
@@ -767,17 +729,13 @@ export function initialize(loggedInUser) {
           }
         });
 
-
-
-
         // Usage in toggleChatModal or socket.on
-
 
         socket.on("ON_USER_LIVE_STATUS", function (data) {
           const p_data = JSON.parse(data);
           console.log("is user going offline?", p_data);
 
-          if (!p_data.hasOwnProperty('status')) {
+          if (!p_data.hasOwnProperty("status")) {
             console.error("No status provided!");
           } else {
             const statusElement = document.getElementById("statusElement");
@@ -793,52 +751,45 @@ export function initialize(loggedInUser) {
                 statusElement.style.background = "#a99bbe";
               }
             }
-
           }
         });
-
-
 
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
 
-          addToMsgsLs(data)
+          addToMsgsLs(data);
 
-          console.log("some file it seeems was upload p_data.message.msg_id ed?", data, typeof (data));
+          console.log(
+            "some file it seeems was upload p_data.message.msg_id ed?",
+            data,
+            typeof data
+          );
           // delete data.message.result.message;
 
           // const p_data = JSON.parse(data);
           console.log("upload msg data", data);
 
-          informPeerSysAboutMsgStatus(socket, data.message.msg_id)
-          
-          updateNotificationBell(tezkit_app_data)
-
-
+          informPeerSysAboutMsgStatus(socket, data.message.msg_id);
+          updateNotificationBell(tezkit_app_data);
 
           if (chat_modal_open) {
-            console.log("is there anything yet stored in the global_bucket", data)
+            console.log(
+              "is there anything yet stored in the global_bucket",
+              data
+            );
             // const msg = p_data["message"]["message"];
             // const timestamp = p_data["message"]["timestamp"];
-  
-            addNewElementToChatBody(data, 'FILE_MIXED');
-  
-  
-            informPeerSysAboutMsgStatus(socket, data.message.msg_id, "READ")
+
+            addNewElementToChatBody(data, "FILE_MIXED");
+
+            informPeerSysAboutMsgStatus(socket, data.message.msg_id, "READ");
           } else {
             //SAVE IT INTO THE BUCKET
             global_bucket.unread_msgs.push(data);
           }
-
-
-
         });
-
       }
     }
-
-
-   
 
     // Function to update the reaction
     function updateMessageReaction(messageElement, reaction) {
@@ -852,13 +803,11 @@ export function initialize(loggedInUser) {
       console.log("Reaction updated to:", reaction);
     }
 
-
-
     function handleMsgReactionEvent(p_data) {
       const { msg_id, message } = p_data.message;
       const reaction = message;
       const chatBody = document.getElementById("chatBody");
-      console.log("dont tell me it was through this?")
+      console.log("dont tell me it was through this?");
 
       const msgIndex = getMessageIndex(msg_id);
       const messageElement = getMessageElement(msgIndex, chatBody);
@@ -867,46 +816,33 @@ export function initialize(loggedInUser) {
         updateMessageReaction(messageElement, reaction);
       }
     }
-
-
-
-
-
-
   }
 
   const token = localStorage.getItem("tezkit_token");
 
   if (tezkit_app_data) {
-    const tezkit_app_p_data = JSON.parse(tezkit_app_data)
-    console.log("here is the tezkit_app_p_data.settings.authCloudManaged", tezkit_app_p_data);
+    const tezkit_app_p_data = JSON.parse(tezkit_app_data);
+    console.log(
+      "here is the tezkit_app_p_data.settings.authCloudManaged",
+      tezkit_app_p_data
+    );
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
       if (!token) {
-        console.log("dfgfghfghhjfrghfgsdfasdfasdfh")
+        console.log("dfgfghfghhjfrghfgsdfasdfasdfh");
 
         renderAuthHeader();
       } else {
-
         renderAuthHeader(token);
 
         // rightPart.appendChild(makeCompButton);
       }
-
-
     }
-
-
-
-  }
-  else {
+  } else {
     renderAuthHeader();
-
   }
-
 
   console.log("are we here yet!");
-
 
   // Create the modal element
   const modal = document.createElement("div");
@@ -923,33 +859,26 @@ export function initialize(loggedInUser) {
   // Function to toggle the modal visibility
   function toggleChatModal() {
     const chat_modal = document.getElementById("chatModal");
-    console.log("sdfsdfsdafchat_modal_open", chat_modal_open)
+    console.log("sdfsdfsdafchat_modal_open", chat_modal_open);
 
     if (!chat_modal_open) {
-
       // Get the width and height of the window
       const width = window.innerWidth;
       // const height =  window.innerHeight;
 
       // Log the dimensions to the console
       // console.log(`Widtsdfsdh: ${width}px, Height: ${height}px`);
-      console.log("MOBILE_WIDTHfdsf", MOBILE_WIDTH)
+      console.log("MOBILE_WIDTHfdsf", MOBILE_WIDTH);
       if (width < MOBILE_WIDTH) {
-        console.log("areraewr dcp,dog dfsd")
+        console.log("areraewr dcp,dog dfsd");
         chat_modal.style.display = "flex";
-
-      }
-      else {
-        console.log("else block is executing???", width)
+      } else {
+        console.log("else block is executing???", width);
         chat_modal.style.display = "block";
-
       }
-
-
     } else {
       chat_modal.style.display = "none";
     }
-
 
     if (loggedInUser) {
       console.log("Now we can just updae the title");
@@ -958,26 +887,22 @@ export function initialize(loggedInUser) {
       const chatHeader = chat_modal.querySelector(".chat_header");
       const loginMessage = chatHeader.querySelector("h3");
       const statusElement = chatHeader.querySelector("#statusElement");
-      console.log("identifiersfdgsd", identifiers)
+      console.log("identifiersfdgsd", identifiers);
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
 
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
     }
 
-    chat_modal_open = !chat_modal_open
-
-
+    chat_modal_open = !chat_modal_open;
   }
 
   function closeModal() {
     console.log("you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
-    toggleChatModal()
-
+    toggleChatModal();
   }
-
 
   chat_modal.innerHTML = `
   <div class="chat_header">
@@ -1002,7 +927,6 @@ export function initialize(loggedInUser) {
     "and if modal is open if logged into chat lets update the username on the chat header??"
   );
 
-
   // // Create an img element for the logo
   const chat_modal_container = document.createElement("div");
   chat_modal_container.setAttribute("id", "chat_modal_opener");
@@ -1011,15 +935,14 @@ export function initialize(loggedInUser) {
   chat_modal_container.style.justifyContent = "center";
   chat_modal_container.style.backgroundColor = "#A370CE";
 
-  const theme = localStorage.getItem('theme')
-  const theme_p = JSON.parse(theme)
-  console.log("what is this theme here?",theme)
-  if (theme_p && theme_p.chat_opener_theme){
+  const theme = localStorage.getItem("theme");
+  const theme_p = JSON.parse(theme);
+  console.log("what is this theme here?", theme);
+  if (theme_p && theme_p.chat_opener_theme) {
     //override css here...
-    chat_modal_container.style.backgroundColor = theme_p.chat_opener_theme['backgroundColor'] 
-
+    chat_modal_container.style.backgroundColor =
+      theme_p.chat_opener_theme["backgroundColor"];
   }
-
 
   chat_modal_container.style.height = "50px";
   chat_modal_container.style.width = "50px";
@@ -1033,33 +956,28 @@ export function initialize(loggedInUser) {
   chat_modal_opener.style.color = "#fff";
   chat_modal_opener.style.fontSize = "24px";
 
-
-
   chat_modal_opener.addEventListener("click", function () {
     // const tezkit_app_data = localStorage.getItem('tezkit_app_data')
 
-    console.log(tezkit_app_data, "here is bucket's data", global_bucket)
+    console.log(tezkit_app_data, "here is bucket's data", global_bucket);
 
     if (global_bucket) {
       // const p_data = global_bucket.unread_msgs[0]
 
-      global_bucket.unread_msgs.forEach(p_data => {
-        console.log("what is this after relaod?",p_data)
-        updateNotificationBell(tezkit_app_data)
-        const msg = p_data["message"]["message"]
+      global_bucket.unread_msgs.forEach((p_data) => {
+        console.log("what is this after relaod?", p_data);
+        updateNotificationBell(tezkit_app_data);
+        const msg = p_data["message"]["message"];
         const timestamp = p_data["message"]["timestamp"];
-        const msg_id = p_data["message"]["msg_id"]
+        const msg_id = p_data["message"]["msg_id"];
 
         addNewElementToChatBody(p_data);
-        informPeerSysAboutMsgStatus(socket, msg_id, "READ")
+        informPeerSysAboutMsgStatus(socket, msg_id, "READ");
       });
-      global_bucket.unread_msgs = []
-
+      global_bucket.unread_msgs = [];
     }
 
-
     toggleChatModal();
-
   });
 
   chat_modal_container.appendChild(chat_modal_opener);
@@ -1071,12 +989,8 @@ export function initialize(loggedInUser) {
   const chatInput = document.getElementById("chatInput");
   const sendButton = document.getElementById("sendButton");
 
-
-
   // Example of history messages
   const messages = [];
-
-
 
   function renderReaction(reaction) {
     if (!reaction) return "";
@@ -1084,11 +998,10 @@ export function initialize(loggedInUser) {
     return `<div class="reaction">${reaction}</div>`;
   }
 
-
-  function renderMessage(newMessage, type = 'REGULAR') {
-    console.log("this is when the msg is sent??",newMessage)
+  function renderMessage(newMessage, type = "REGULAR") {
+    console.log("this is when the msg is sent??", newMessage);
     if (newMessage) {
-      if (type === 'REGULAR') {
+      if (type === "REGULAR") {
         const messageWrapper = document.createElement("div");
         messageWrapper.classList.add("message-container");
 
@@ -1109,8 +1022,7 @@ export function initialize(loggedInUser) {
         // Append the new message at the bottom of chatBody
         chatBody.appendChild(messageWrapper);
         messageWrapper.appendChild(messageElement);
-
-      } else if (type === 'FILE_MIXED') {
+      } else if (type === "FILE_MIXED") {
         const messageWrapper = document.createElement("div");
         messageWrapper.classList.add("message-container");
 
@@ -1119,21 +1031,27 @@ export function initialize(loggedInUser) {
         messageElement.classList.add(newMessage.to_user.id || "de");
 
         // Handling files, showing them directly as images
-        let filesHtml = '';
+        let filesHtml = "";
         if (newMessage.result.files && newMessage.result.files.length > 0) {
-          filesHtml = newMessage.result.files.map(fileUrl => {
-
-            // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
-            return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
-          }).join("");
+          filesHtml = newMessage.result.files
+            .map((fileUrl) => {
+              // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
+              return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
+            })
+            .join("");
         }
 
         // Handling text content
-        let textHtml = '';
-        if (newMessage.result.sometext_data && newMessage.result.sometext_data.length > 0) {
-          textHtml = JSON.parse(newMessage.result.sometext_data).map(msg => {
-            return `<p>${msg}</p>`;
-          }).join("");
+        let textHtml = "";
+        if (
+          newMessage.result.sometext_data &&
+          newMessage.result.sometext_data.length > 0
+        ) {
+          textHtml = JSON.parse(newMessage.result.sometext_data)
+            .map((msg) => {
+              return `<p>${msg}</p>`;
+            })
+            .join("");
         }
 
         // Construct the message inner HTML
@@ -1154,16 +1072,12 @@ export function initialize(loggedInUser) {
     }
   }
 
-
-
-
   sendButton.addEventListener("click", () => {
     if (loggedInUser) {
-
       let new_rply_msg_obj = {
         // "type": "reply",
         room: "global_for__1",
-        message:{
+        message: {
           message: chatInput.value,
           timestamp: new Date().toLocaleTimeString(),
           frm_user: {
@@ -1174,9 +1088,8 @@ export function initialize(loggedInUser) {
             id: 1,
             user: "Admin",
           },
-        }
+        },
       };
-
 
       const messageText = chatInput.value;
       if (messageText.trim() !== "") {
@@ -1189,11 +1102,9 @@ export function initialize(loggedInUser) {
           }),
         };
 
-
         console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
-        addToMsgsLs(new_rply_msg_obj)
-
+        addToMsgsLs(new_rply_msg_obj);
 
         messages.push(newMessage);
         renderMessage(newMessage);
@@ -1213,9 +1124,55 @@ export function initialize(loggedInUser) {
 
 function createButtonComp(text, onClick) {
   const button = document.createElement("button");
+  button.style.border = "3px solid black";
   button.textContent = text;
   button.addEventListener("click", onClick);
   return button;
+}
+function createModal(content) {
+  const modalOverlay = document.createElement("div");
+  modalOverlay.style.position = "fixed";
+  modalOverlay.style.top = "0";
+  modalOverlay.style.left = "0";
+  modalOverlay.style.width = "100%";
+  modalOverlay.style.height = "100%";
+  modalOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  modalOverlay.style.display = "flex";
+  modalOverlay.style.justifyContent = "center";
+  modalOverlay.style.alignItems = "center";
+  modalOverlay.style.zIndex = "1000";
+
+  const modalContent = document.createElement("div");
+  modalContent.style.backgroundColor = "white";
+  modalContent.style.padding = "20px";
+  modalContent.style.borderRadius = "8px";
+  modalContent.style.width = "500px";
+  modalContent.style.textAlign = "center";
+
+  // // back button
+  const backButton = document.createElement("button");
+
+  const icon = document.createElement("i");
+  icon.classList.add("fa-solid", "fa-arrow-left");
+  icon.style.color = "black";
+  icon.style.fontSize = "24px";
+  icon.style.padding = "14px";
+  backButton.appendChild(icon);
+
+  // backButton.textContent = "Back";
+  backButton.style.marginBottom = "15px";
+  backButton.style.border = "none";
+  backButton.style.outline = "none";
+  backButton.style.borderRadius = "8px";
+  backButton.addEventListener("click", () => {
+    document.body.removeChild(modalOverlay);
+  });
+
+  modalContent.appendChild(backButton);
+  modalContent.appendChild(content);
+  modalOverlay.appendChild(modalContent);
+
+  document.body.appendChild(modalOverlay);
 }
 
 // Function to handle routing to /chat and render a box with an orange background
@@ -1243,7 +1200,7 @@ export function routeToChat() {
 // Function to handle routing to /login and render a login form
 export function routeToLogin() {
   // Clear the body content
-  document.body.innerHTML = "";
+  // document.body.innerHTML = "";
 
   // Create the login form
   // const loginForm = createLoginForm(handleLogin);
@@ -1269,10 +1226,12 @@ export function routeToLogin() {
 
   const loginForm = createDynamicForm(formConfig, handleLogin);
 
-  document.body.appendChild(loginForm);
+  createModal(loginForm);
+
+  // document.body.appendChild(loginForm);
 
   // Optionally, update the URL to reflect the new route
-  history.pushState(null, "", "/login");
+  // history.pushState(null, "", "/login");
 }
 
 // Function to toggle the modal visibility
@@ -1285,7 +1244,6 @@ function toggleNotificationModal() {
     modal.style.display = "none";
   }
 }
-
 
 // Function to toggle the signup form visibility
 function toggleSignup() {
@@ -1322,8 +1280,7 @@ function createSignupForm() {
   const fullNameInput = createFormInput(
     "full_name",
     "Enter your full name",
-    "text",
-
+    "text"
   );
   form.appendChild(fullNameInput);
 
@@ -1331,8 +1288,7 @@ function createSignupForm() {
   const phoneInput = createFormInput(
     "phone",
     "Enter your phone number",
-    "text",
-
+    "text"
   );
   form.appendChild(phoneInput);
 
@@ -1379,12 +1335,10 @@ function createSignupForm() {
   submitButton.style.borderRadius = "3px";
   form.appendChild(submitButton);
 
-
-
-  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-  console.log("what is ittezkit_app_data", tezkit_app_data)
-  const tezkit_app_pdata = JSON.parse(tezkit_app_data)
-  console.log("there is thenat", tezkit_app_pdata.tenant_id)
+  const tezkit_app_data = localStorage.getItem("tezkit_app_data");
+  console.log("what is ittezkit_app_data", tezkit_app_data);
+  const tezkit_app_pdata = JSON.parse(tezkit_app_data);
+  console.log("there is thenat", tezkit_app_pdata.tenant_id);
   // Form submission handling
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1398,12 +1352,16 @@ function createSignupForm() {
       tenant: tezkit_app_pdata.tenant_id,
       gender: formData.get("gender"),
       app_name: tezkit_app_pdata.app_name,
-      role: 65536
+      role: 65536,
     };
 
-    console.log(data, "let see if left it identical to right", tezkit_app_pdata.auth_key)
+    console.log(
+      data,
+      "let see if left it identical to right",
+      tezkit_app_pdata.auth_key
+    );
     try {
-      console.log("is it running??")
+      console.log("is it running??");
 
       const response = await fetch(
         "https://8dk6ofm0db.execute-api.ap-south-1.amazonaws.com/prod/signup",
@@ -1411,7 +1369,7 @@ function createSignupForm() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-Key": tezkit_app_pdata.auth_key
+            "X-API-Key": tezkit_app_pdata.auth_key,
           },
           body: JSON.stringify(data),
         }
@@ -1439,10 +1397,12 @@ function createFormInput(name, placeholder, type) {
   input.placeholder = placeholder;
   input.type = type;
   input.style.width = "100%";
-  input.style.padding = "10px";
-  input.style.marginBottom = "10px";
+  input.style.padding = "15px";
+  input.style.marginBottom = "20px";
   input.style.border = "1px solid #ccc";
   input.style.borderRadius = "3px";
+  input.style.outline = "none";
+  input.style.fontSize = "16px";
   return input;
 }
 
@@ -1450,12 +1410,12 @@ function createFormInput(name, placeholder, type) {
 function createDynamicForm(config, handleSubmit) {
   const form = document.createElement("form");
   form.style.width = "100%";
-  form.style.maxWidth = "400px";
-  form.style.margin = "auto";
-  form.style.padding = "20px";
-  form.style.backgroundColor = "#f2f2f2";
-  form.style.border = "1px solid #ccc";
-  form.style.borderRadius = "5px";
+  // form.style.maxWidth = "400px";
+  // form.style.margin = "auto";
+  // form.style.padding = "20px";
+  // form.style.backgroundColor = "#f2f2f2";
+  // form.style.border = "1px solid #ccc";
+  // form.style.borderRadius = "5px";
   form.id = config.form.id;
 
   // Title
@@ -1480,11 +1440,13 @@ function createDynamicForm(config, handleSubmit) {
   submitButton.type = "submit";
   submitButton.textContent = config.submitButton.textContent || "Submit";
   submitButton.style.width = "100%";
-  submitButton.style.padding = "10px";
+  submitButton.style.padding = "20px";
   submitButton.style.backgroundColor = "#4CAF50";
   submitButton.style.color = "white";
   submitButton.style.border = "none";
   submitButton.style.borderRadius = "3px";
+  submitButton.style.fontSize = "16px";
+  submitButton.style.fontWeight = "600px";
   form.appendChild(submitButton);
 
   // Form submission handling
@@ -1499,8 +1461,8 @@ async function handleLogin(event) {
   const form = event.target;
   const formData = new FormData(form);
 
-  const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-  const tezkit_app_pdata = JSON.parse(tezkit_app_data)
+  const tezkit_app_data = localStorage.getItem("tezkit_app_data");
+  const tezkit_app_pdata = JSON.parse(tezkit_app_data);
   const data = {
     type: "user_type",
     email: formData.get("email"),
@@ -1513,7 +1475,7 @@ async function handleLogin(event) {
     "User-Agent": "Thunder Client (https://www.thunderclient.com)",
     "Content-Type": "application/json",
   };
-  console.log("is it running222??")
+  console.log("is it running222??");
 
   try {
     const response = await fetch(
@@ -1532,8 +1494,7 @@ async function handleLogin(event) {
       console.log("Token:", responseData.token); // Assuming token is in the response data
       localStorage.setItem("tezkit_token", responseData.token);
 
-
-      console.log("areweherdde?")
+      console.log("areweherdde?");
 
       routeToRoot("/package-consumer/index.html");
     } else {
