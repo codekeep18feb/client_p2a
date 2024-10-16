@@ -317,8 +317,7 @@ export function renderAuthHeader(token) {
 
   const rightPart = document.createElement("div");
   rightPart.classList.add("right");
-  rightPart.style.border = "5px solid red";
-
+  
   const notificationIcon = document.createElement("span");
   notificationIcon.textContent = "🔔";
   notificationIcon.style.cursor = "pointer";
@@ -596,7 +595,7 @@ export function initialize(loggedInUser) {
       console.error("app_name not provided to the client!");
     } else {
       console.log("arerewrewrew");
-      const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
+      const reqUrl = `https://10dimmjpse.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
       const headersList = {
         Accept: "*/*",
         "X-API-Key": api_key, //THIS ONE SHOULD BE PICKED FROM index.html
@@ -1124,7 +1123,6 @@ export function initialize(loggedInUser) {
 
 function createButtonComp(text, onClick) {
   const button = document.createElement("button");
-  button.style.border = "3px solid black";
   button.textContent = text;
   button.addEventListener("click", onClick);
   return button;
@@ -1144,9 +1142,9 @@ function createModal(content) {
 
   const modalContent = document.createElement("div");
   modalContent.style.backgroundColor = "white";
-  modalContent.style.padding = "20px";
+  modalContent.style.padding = "100px";
   modalContent.style.borderRadius = "8px";
-  modalContent.style.width = "500px";
+  modalContent.style.width = "800px";
   modalContent.style.textAlign = "center";
 
   // // back button
@@ -1253,7 +1251,9 @@ function toggleSignup() {
   } else {
     const signupForm = createSignupForm();
     signupForm.id = "signupForm";
-    document.body.appendChild(signupForm);
+    // document.body.innerHTML = "";
+    createModal(signupForm)
+    // document.body.appendChild(signupForm);
   }
 }
 
@@ -1261,12 +1261,12 @@ function toggleSignup() {
 function createSignupForm() {
   const form = document.createElement("form");
   form.style.width = "100%";
-  form.style.maxWidth = "400px";
-  form.style.margin = "auto";
-  form.style.padding = "20px";
-  form.style.backgroundColor = "#f2f2f2";
-  form.style.border = "1px solid #ccc";
-  form.style.borderRadius = "5px";
+  // form.style.maxWidth = "400px";
+  // form.style.margin = "auto";
+  // form.style.padding = "20px";
+  // form.style.backgroundColor = "#f2f2f2";
+  // form.style.border = "1px solid #ccc";
+  // form.style.borderRadius = "5px";
   form.id = "signupForm";
 
   // Title
@@ -1305,34 +1305,56 @@ function createSignupForm() {
   form.appendChild(passwordInput);
 
   // Gender input
+  const genderWrapper = document.createElement("div");
+  genderWrapper.style.display = "flex";
+  genderWrapper.style.alignItems = "center";
+  genderWrapper.style.gap = "20px";
+
+
+
   const genderLabel = document.createElement("label");
-  genderLabel.textContent = "Gender";
-  form.appendChild(genderLabel);
+  genderLabel.textContent = "Gender:";
+  genderLabel.style.fontSize = "18px:";
+  genderLabel.style.fontWeight = "600";
+  genderLabel.style.marginRight = "10px";
+  // form.appendChild(genderLabel);
 
   const genderMale = document.createElement("input");
   genderMale.type = "radio";
   genderMale.name = "gender";
   genderMale.value = "Male";
-  form.appendChild(genderMale);
-  form.appendChild(document.createTextNode("Male"));
+  genderMale.style.transform = "scale(1.5)";
+  // form.appendChild(genderMale);
+  // form.appendChild(document.createTextNode("Male"));
 
   const genderFemale = document.createElement("input");
   genderFemale.type = "radio";
   genderFemale.name = "gender";
   genderFemale.value = "Female";
-  form.appendChild(genderFemale);
-  form.appendChild(document.createTextNode("Female"));
+  genderFemale.style.transform = "scale(1.5)";
+  // form.appendChild(genderFemale);
+  // form.appendChild(document.createTextNode("Female"));
+
+  genderWrapper.appendChild(genderLabel);
+  genderWrapper.appendChild(genderMale);
+  genderWrapper.appendChild(document.createTextNode("Male"));
+  genderWrapper.appendChild(genderFemale);
+  genderWrapper.appendChild(document.createTextNode("Female"));
+  form.appendChild(genderWrapper);
 
   // Submit button
   const submitButton = document.createElement("button");
   submitButton.type = "submit";
   submitButton.textContent = "Signup";
   submitButton.style.width = "100%";
-  submitButton.style.padding = "10px";
+  submitButton.style.padding = "20px";
   submitButton.style.backgroundColor = "#4CAF50";
   submitButton.style.color = "white";
   submitButton.style.border = "none";
   submitButton.style.borderRadius = "3px";
+  submitButton.style.fontSize = "16px";
+  submitButton.style.marginTop = "30px";
+  submitButton.style.cursor = "pointer";
   form.appendChild(submitButton);
 
   const tezkit_app_data = localStorage.getItem("tezkit_app_data");
@@ -1447,6 +1469,8 @@ function createDynamicForm(config, handleSubmit) {
   submitButton.style.borderRadius = "3px";
   submitButton.style.fontSize = "16px";
   submitButton.style.fontWeight = "600px";
+  submitButton.style.marginTop = "30px";
+  submitButton.style.cursor = "pointer";
   form.appendChild(submitButton);
 
   // Form submission handling
