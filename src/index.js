@@ -236,49 +236,77 @@ function addNewElementToChatBody(obj, msg_type = "REGULAR") {
     const messageWrapper = document.createElement("div");
     messageWrapper.classList.add("message-container");
 
-    const messageElement = document.createElement("div");
-    messageElement.classList.add("message");
-    // messageElement.classList.add(obj.to_user.id || "de");
+    // const messageElement = document.createElement("div");
+    // messageElement.classList.add("message");
+    // // messageElement.classList.add(obj.to_user.id || "de");
 
-    // Handling files, showing them directly as images
-    let filesHtml = "";
-    console.log("objdsfsdf", obj);
-    if (obj.message.result.files && obj.message.result.files.length > 0) {
-      filesHtml = obj.message.result.files
-        .map((fileUrl) => {
-          // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
-          return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
-        })
-        .join("");
-    }
+    // // Handling files, showing them directly as images
+    // let filesHtml = "";
+    // console.log("objdsfsdf", obj);
+    // if (obj.message.result.files && obj.message.result.files.length > 0) {
+    //   filesHtml = obj.message.result.files
+    //     .map((fileUrl) => {
+    //       // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
+    //       return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
+    //     })
+    //     .join("");
+    // }
 
-    // Handling text content
-    let textHtml = "";
-    if (
-      obj.message.result.sometext_data &&
-      obj.message.result.sometext_data.length > 0
-    ) {
-      textHtml = JSON.parse(obj.message.result.sometext_data)
-        .map((msg) => {
-          return `<p>${msg}</p>`;
-        })
-        .join("");
-    }
+    // // Handling text content
+    // let textHtml = "";
+    // if (
+    //   obj.message.result.sometext_data &&
+    //   obj.message.result.sometext_data.length > 0
+    // ) {
+    //   textHtml = JSON.parse(obj.message.result.sometext_data)
+    //     .map((msg) => {
+    //       return `<p>${msg}</p>`;
+    //     })
+    //     .join("");
+    // }
 
-    // Construct the message inner HTML
-    messageElement.innerHTML = `
-      <div class="file-mixed-content">
-        ${filesHtml}
-        ${textHtml}
-      </div>
-      <span class="timestamp">${new Date().toLocaleTimeString()}</span>
-    `;
+    // // Construct the message inner HTML
+    // messageElement.innerHTML = `
+    //   <div class="file-mixed-content">
+    //     ${filesHtml}
+    //     ${textHtml}
+    //   </div>
+    //   <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+    // `;
 
-    console.log("Rendering FILE_MIXED message:", messageElement);
+    // console.log("Rendering FILE_MIXED message:", messageElement);
+
+    const containerDiv = document.createElement('div');
+    console.log("here iam messageObj.message.result",obj.message.result)
+    obj.message.result.forEach(paragraph => {
+        // Create a <p> element for each paragraph
+        const pElement = document.createElement('p');
+      
+        // Loop through each node (text or image) in the paragraph
+        paragraph.forEach(node => {
+          if (node.type === 'text') {
+            // Create a text node and append it to the paragraph
+            const textNode = document.createTextNode(node.value);
+            pElement.appendChild(textNode);
+          } else if (node.type === 'img') {
+            // Create an <img> element and append it to the paragraph
+            const imgElement = document.createElement('img');
+            imgElement.src = node.value;
+            imgElement.alt = 'Image';
+            imgElement.style.maxWidth = '100%'; // To ensure the image fits within the container
+            pElement.appendChild(imgElement);
+          }
+        });
+      
+        // Append the constructed <p> element to the container div
+        containerDiv.appendChild(pElement);
+      });
+
 
     // Append the new message at the bottom of chatBody
     // chatBody.appendChild(messageWrapper);
-    messageWrapper.appendChild(messageElement);
+    containerDiv.setAttribute("class","file-mixed-content")
+    messageWrapper.appendChild(containerDiv);
     append_msg = messageWrapper;
   } else {
     console.error("no msg_type provided!");
@@ -596,7 +624,7 @@ export function initialize(loggedInUser) {
       console.error("app_name not provided to the client!");
     } else {
       console.log("arerewrewrew");
-      const reqUrl = `https://qiwppawsr7.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
+      const reqUrl = `https://gbzm6cqi21.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
       const headersList = {
         Accept: "*/*",
         "X-API-Key": api_key, //THIS ONE SHOULD BE PICKED FROM index.html
@@ -635,7 +663,7 @@ export function initialize(loggedInUser) {
     console.log("loggedInUserasdfasd", loggedInUser);
     // const io = await require('socket.io-client') // For client-side connection
 
-    socket = io("http://122.160.157.99:8001");
+    socket = io("http://122.160.157.99:8022");
     console.log("loggedInUser in initialze??");
 
     // console.log("user on consumer joined", "global_for__" + identifiers["uid"]);
