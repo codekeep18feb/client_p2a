@@ -845,6 +845,7 @@ export function initialize(loggedInUser) {
       }
     }
   }
+  
 
   const token = localStorage.getItem("tezkit_token");
 
