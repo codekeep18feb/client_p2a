@@ -909,6 +909,7 @@ export function initialize(loggedInUser) {
       chat_modal.style.display = "none";
     }
 
+    console.log("ehertertertert",loggedInUser)
     if (loggedInUser) {
       console.log("Now we can just updae the title");
 
