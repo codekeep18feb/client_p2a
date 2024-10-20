@@ -688,7 +688,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
           const p_data = JSON.parse(data);
 
-          addToMsgsLs(p_data);
+          // addToMsgsLs(p_data);
 
           console.log("got ta msg", p_data);
           informPeerSysAboutMsgStatus(socket, p_data.message.msg_id);
@@ -715,7 +715,7 @@ export function initialize(loggedInUser) {
           console.log("Reply Recieved!", data);
 
           const p_data = JSON.parse(data);
-          addToMsgsLs(p_data);
+          // addToMsgsLs(p_data);
 
           console.log("reply msg data", p_data);
 
@@ -785,7 +785,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
 
-          addToMsgsLs(data);
+          // addToMsgsLs(data);
 
           console.log(
             "some file it seeems was upload p_data.message.msg_id ed?",
@@ -832,7 +832,7 @@ export function initialize(loggedInUser) {
     }
 
     function handleMsgReactionEvent(p_data) {
-      const { msg_id, message } = p_data.message;
+      const { msg_id, message, to_msg } = p_data.message;
       const reaction = message;
       const chatBody = document.getElementById("chatBody");
       console.log("dont tell me it was through this?");
@@ -841,7 +841,19 @@ export function initialize(loggedInUser) {
       const messageElement = getMessageElement(msgIndex, chatBody);
 
       if (messageElement) {
+        console.log(messageElement,"p_data les extract to_msg.msg from here too",p_data)
+
+        const cb = document.querySelector('#chatBody > div > div > p')
+        if (cb.textContent != to_msg.msg){
+          console.error("Msg not found! Must be deleted!")
+        }
+        else{
+
         updateMessageReaction(messageElement, reaction);
+
+        }
+
+
       }
     }
   }
@@ -1132,7 +1144,7 @@ export function initialize(loggedInUser) {
 
         console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
-        addToMsgsLs(new_rply_msg_obj);
+        // addToMsgsLs(new_rply_msg_obj);
 
         messages.push(newMessage);
         renderMessage(newMessage);
