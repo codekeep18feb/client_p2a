@@ -700,7 +700,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
           const p_data = JSON.parse(data);
 
-          // addToMsgsLs(p_data);
+          addToMsgsLs(p_data);
 
           console.log("got ta msg", p_data);
           informPeerSysAboutMsgStatus(socket, p_data.message.msg_id);
@@ -727,7 +727,7 @@ export function initialize(loggedInUser) {
           console.log("Reply Recieved!", data);
 
           const p_data = JSON.parse(data);
-          // addToMsgsLs(p_data);
+          addToMsgsLs(p_data);
 
           console.log("reply msg data", p_data);
 
@@ -739,8 +739,8 @@ export function initialize(loggedInUser) {
               "is there anything yet stored in the global_bucket",
               p_data
             );
-            const msg = p_data["message"]["message"];
-            const timestamp = p_data["message"]["timestamp"];
+            // const msg = p_data["message"]["message"];
+            // const timestamp = p_data["message"]["timestamp"];
             addNewElementToChatBody(p_data, "REPLY");
             informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
@@ -797,7 +797,7 @@ export function initialize(loggedInUser) {
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
 
-          // addToMsgsLs(data);
+          addToMsgsLs(data);
 
           console.log(
             "some file it seeems was upload p_data.message.msg_id ed?",
@@ -1157,7 +1157,7 @@ export function initialize(loggedInUser) {
 
         console.log("w atis thsi", new_rply_msg_obj);
         socket.emit("ON_MESSAGE_ARRIVAL_BOT", new_rply_msg_obj);
-        // addToMsgsLs(new_rply_msg_obj);
+        addToMsgsLs(new_rply_msg_obj);
 
         messages.push(newMessage);
         renderMessage(newMessage);
