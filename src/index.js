@@ -403,9 +403,9 @@ export function renderAuthHeader(token) {
 }
 
 export function handleMsgUpdatedEvent(p_data) {
-  console.log("dont tell me it was through thisfsdf?");
+  console.log("dont tell me it was through thisfsdf?",p_data);
 
-  const { msg_id, message } = p_data.message;
+  const { msg_id, message, to_msg } = p_data.message;
   const msg = message;
   const chatBody = document.getElementById("chatBody");
 
@@ -413,7 +413,19 @@ export function handleMsgUpdatedEvent(p_data) {
   const messageElement = getMessageElement(msgIndex, chatBody);
 
   if (messageElement) {
-    updateMessageText(messageElement, msg);
+
+    const cb = messageElement.querySelector('div > p')
+    console.log(cb.textContent, "dowehave edit the cb",cb, to_msg.msg)
+    if (cb.textContent != to_msg.msg){
+      console.error("Msg not found to Edited! Must be deleted!")
+    }
+    else{
+      updateMessageText(messageElement, msg);
+
+
+    }
+
+    
   }
 }
 
@@ -843,9 +855,10 @@ export function initialize(loggedInUser) {
       if (messageElement) {
         console.log(messageElement,"p_data les extract to_msg.msg from here too",p_data)
 
-        const cb = document.querySelector('#chatBody > div > div > p')
+        const cb = messageElement.querySelector('div > p')
+        console.log("dowehave the cb",cb)
         if (cb.textContent != to_msg.msg){
-          console.error("Msg not found! Must be deleted!")
+          console.error("Msg not found to be reacted! Must be deleted!")
         }
         else{
 
