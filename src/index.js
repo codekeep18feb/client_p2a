@@ -183,8 +183,9 @@ export function renderCustomizeComponent() {
 
 let socket;
 
-function addNewElementToChatBody(obj, msg_type = "REGULAR") {
-  console.log("this is when the msg is reieved??", obj);
+function addNewElementToChatBody(chatBody, obj, msg_type = "REGULAR") {
+  
+  console.log(msg_type,"this is when the msg is reieved??", obj);
 
   let append_msg = null;
   if (msg_type == "REGULAR") {
@@ -200,7 +201,8 @@ function addNewElementToChatBody(obj, msg_type = "REGULAR") {
       `;
     append_msg = new_messageElement;
   }
-  if (msg_type == "REPLY") {
+
+  else if (msg_type == "REPLY") {
     console.log("renderReplyMessage with replyMsg:", obj);
 
     console.log("originalMessageText:", obj.message.to_msg.msg);
@@ -233,50 +235,11 @@ function addNewElementToChatBody(obj, msg_type = "REGULAR") {
     console.log("reply message with original message", replyElement);
     replyWrapper.appendChild(replyElement);
     append_msg = replyWrapper;
-  } else if (msg_type === "FILE_MIXED") {
+  } 
+  
+  else if (msg_type === "FILE_MIXED") {
     const messageWrapper = document.createElement("div");
     messageWrapper.classList.add("message-container");
-
-    // const messageElement = document.createElement("div");
-    // messageElement.classList.add("message");
-    // // messageElement.classList.add(obj.to_user.id || "de");
-
-    // // Handling files, showing them directly as images
-    // let filesHtml = "";
-    // console.log("objdsfsdf", obj);
-    // if (obj.message.result.files && obj.message.result.files.length > 0) {
-    //   filesHtml = obj.message.result.files
-    //     .map((fileUrl) => {
-    //       // let cleanedUrl = fileUrl.replace(/"/g, '');  // Remove double quotes
-    //       return `<img src="${fileUrl}" alt="file" class="file-preview" />`;
-    //     })
-    //     .join("");
-    // }
-
-    // // Handling text content
-    // let textHtml = "";
-    // if (
-    //   obj.message.result.sometext_data &&
-    //   obj.message.result.sometext_data.length > 0
-    // ) {
-    //   textHtml = JSON.parse(obj.message.result.sometext_data)
-    //     .map((msg) => {
-    //       return `<p>${msg}</p>`;
-    //     })
-    //     .join("");
-    // }
-
-    // // Construct the message inner HTML
-    // messageElement.innerHTML = `
-    //   <div class="file-mixed-content">
-    //     ${filesHtml}
-    //     ${textHtml}
-    //   </div>
-    //   <span class="timestamp">${new Date().toLocaleTimeString()}</span>
-    // `;
-
-    // console.log("Rendering FILE_MIXED message:", messageElement);
-
     const containerDiv = document.createElement('div');
     console.log("here iam messageObj.message.result",obj.message.result)
     obj.message.result.forEach(paragraph => {
@@ -309,9 +272,14 @@ function addNewElementToChatBody(obj, msg_type = "REGULAR") {
     containerDiv.setAttribute("class","file-mixed-content")
     messageWrapper.appendChild(containerDiv);
     append_msg = messageWrapper;
-  } else {
-    console.error("no msg_type provided!");
+  } 
+  
+  else {
+    console.log("wjatsdfsdfmsg_type",msg_type)
+    console.error("no msg_type provided!",msg_type);
   }
+  // const chatBody = document.getElementById("chatBody");
+
   chatBody.appendChild(append_msg);
 }
 
@@ -669,7 +637,9 @@ export async function initialize(loggedInUser) {
         });
 
         socket.on("ON_MESSAGE_ARRIVAL_BOT", function (data) {
+          console.log("this is being run isnt it?")
           const p_data = JSON.parse(data);
+          console.log("this is being run isnt it?weewr")
 
           addToMsgsLs(p_data);
 
@@ -678,6 +648,7 @@ export async function initialize(loggedInUser) {
 
           // update notifications bell
           updateNotificationBell(tezkit_app_data);
+          console.log("duiddsfsdv1");
 
           if (chat_modal_open) {
             console.log(
@@ -686,10 +657,12 @@ export async function initialize(loggedInUser) {
             );
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
-            addNewElementToChatBody(p_data);
+            console.log("shoulebe ehtere",chatBody)
+            addNewElementToChatBody(chatBody, p_data);
             informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
             //SAVE IT INTO THE BUCKET
+            console.log("werwerweqret rty")
             global_bucket.unread_msgs.push(p_data);
           }
         });
@@ -712,7 +685,7 @@ export async function initialize(loggedInUser) {
             );
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
-            addNewElementToChatBody(p_data, "REPLY");
+            addNewElementToChatBody(chatBody, p_data, "REPLY");
             informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
             //SAVE IT INTO THE BUCKET
@@ -791,7 +764,7 @@ export async function initialize(loggedInUser) {
             // const msg = p_data["message"]["message"];
             // const timestamp = p_data["message"]["timestamp"];
 
-            addNewElementToChatBody(data, "FILE_MIXED");
+            addNewElementToChatBody(chatBody, data, "FILE_MIXED");
 
             informPeerSysAboutMsgStatus(socket, data.message.msg_id, "READ");
           } else {
@@ -985,7 +958,7 @@ document.getElementById("close-btn").addEventListener("click", () => closeModal(
             const timestamp = p_data["message"]["timestamp"];
             const msg_id = p_data["message"]["msg_id"];
 
-            addNewElementToChatBody(p_data);
+            addNewElementToChatBody(chatBody, p_data);
             informPeerSysAboutMsgStatus(socket, msg_id, "READ");
         });
         global_bucket.unread_msgs = [];
