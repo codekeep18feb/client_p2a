@@ -464,7 +464,10 @@ export function setUp(app_name, api_key, theme = null) {
       localStorage.setItem("tezkit_msgs_data", initial_msgs_data_str);
     } else {
       tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-      if (tezkit_msgs_data["api_key"] !== api_key) {
+      console.log(api_key,"watierewtezkit_msgs_data",tezkit_msgs_data,typeof(tezkit_msgs_data))
+
+      const tezkit_msgs_pdata = JSON.parse(tezkit_msgs_data) 
+      if (tezkit_msgs_pdata["api_key"] !== api_key) {
         // console.error("Api Key did not match; Should probably logout and login back.")
         renderErrorPopup([
           "Api Key did not match; Should probably logout and login back.",
@@ -476,7 +479,7 @@ export function setUp(app_name, api_key, theme = null) {
       localStorage.setItem("theme", theme);
     }
 
-    initialize();
+    initialize(null);
   } catch (error) {
     console.error("Failed to set up localStorage:", error.message);
     renderErrorPopup([error.message]);
@@ -574,8 +577,10 @@ function addToMsgsLs(p_data) {
 }
 
 // Function to add a full-width header with a fixed height and red background color
-export async function initialize(loggedInU) {
-  let loggedInUser = loggedInU
+export async function initialize(loggedInUser) {
+  console.log("areuruning twice?")
+
+  // let loggedInUser = loggedInU
   console.log("here iteste for tests???", loggedInUser);
   // Attach the function to the resize event
   window.addEventListener("resize", checkViewportSize);
@@ -868,7 +873,7 @@ export async function initialize(loggedInU) {
   // Function to toggle the modal visibility
   function toggleChatModal(loggedInUser) {
     const chat_modal = document.getElementById("chatModal");
-    console.log("sdfsdfsdafchat_modal_open", chat_modal_open);
+    console.log(loggedInUser,"sdfsdfsdafchat_modal_open", chat_modal_open);
 
     if (!chat_modal_open) {
       // Get the width and height of the window
@@ -907,8 +912,8 @@ export async function initialize(loggedInU) {
     chat_modal_open = !chat_modal_open;
   }
 
-  function closeModal(loggedInUser) {
-    console.log("you click on close btn", chat_modal_open);
+  const closeModal = (loggedInUser) =>{
+    console.log(loggedInUser,"you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
     toggleChatModal(loggedInUser);
@@ -930,8 +935,10 @@ export async function initialize(loggedInU) {
       <button id="sendButton">Send</button>
   </div>
 `;
+console.log("what is this loggedInUser",loggedInUser)
 
-  document.getElementById("close-btn").addEventListener("click", closeModal(loggedInUser));
+// document.getElementById("close-btn").addEventListener("click", (loggedInUser)=>closeModal(loggedInUser));
+document.getElementById("close-btn").addEventListener("click", () => closeModal(loggedInUser));
 
   console.log(
     "and if modal is open if logged into chat lets update the username on the chat header??",loggedInUser
@@ -966,29 +973,29 @@ export async function initialize(loggedInU) {
   chat_modal_opener.style.color = "#fff";
   chat_modal_opener.style.fontSize = "24px";
 
-  chat_modal_opener.addEventListener("click", function () {
-    // const tezkit_app_data = localStorage.getItem('tezkit_app_data')
-
-    console.log(tezkit_app_data, "here is bucket's data", global_bucket);
+  console.log("loggedINuserwhat is this1 ",loggedInUser)
+  chat_modal_opener.addEventListener("click", () => {
+    console.log(tezkit_app_data, "here is bucket's data", loggedInUser);
 
     if (global_bucket) {
-      // const p_data = global_bucket.unread_msgs[0]
+        global_bucket.unread_msgs.forEach((p_data) => {
+            console.log("what is this after reload?", p_data);
+            updateNotificationBell(tezkit_app_data);
+            const msg = p_data["message"]["message"];
+            const timestamp = p_data["message"]["timestamp"];
+            const msg_id = p_data["message"]["msg_id"];
 
-      global_bucket.unread_msgs.forEach((p_data) => {
-        console.log("what is this after relaod?", p_data);
-        updateNotificationBell(tezkit_app_data);
-        const msg = p_data["message"]["message"];
-        const timestamp = p_data["message"]["timestamp"];
-        const msg_id = p_data["message"]["msg_id"];
-
-        addNewElementToChatBody(p_data);
-        informPeerSysAboutMsgStatus(socket, msg_id, "READ");
-      });
-      global_bucket.unread_msgs = [];
+            addNewElementToChatBody(p_data);
+            informPeerSysAboutMsgStatus(socket, msg_id, "READ");
+        });
+        global_bucket.unread_msgs = [];
     }
+    console.log("loggedINuserwhat is this2", loggedInUser);
 
-    toggleChatModal();
-  });
+    toggleChatModal(loggedInUser);
+});
+
+console.log("loggedINuserwhat is this3 ",loggedInUser)
 
   chat_modal_container.appendChild(chat_modal_opener);
   document.body.appendChild(chat_modal_container);
