@@ -1,9 +1,9 @@
 // __tests__/index.test.js
-import { fetchAppData } from '../src/utility'; // Import the function to mock
-import { initialize,setUp } from '../src/index'; // Import the function that uses fetchAppData
+import { fetchAppData } from '../../src/utility'; // Import the function to mock
+import { initialize,setUp } from '../../src/index'; // Import the function that uses fetchAppData
 
 // Mock the module
-jest.mock('../src/utility', () => ({
+jest.mock('../../src/utility', () => ({
   fetchAppData: jest.fn(), // Mock the fetchAppData function
 }));
 
