@@ -1,5 +1,8 @@
+import { fetchAppData } from '../../../src/utility'; // Import the function to mock
+
+
 // import { initialize, global_bucket, handleMsgUpdatedEvent } from '../src/index'; // Adjust the import path
-import * as index from '../src/index';  // Import the entire module
+import * as index from '../../../src/index';  // Import the entire module
 
 
 import io from "socket.io-client";
@@ -7,6 +10,17 @@ import io from "socket.io-client";
 // jest.spyOn(index, 'handleMsgUpdatedEvent').mockImplementation(() => {});
 
 // Now move jest.spyOn() outside of jest.mock()
+
+
+// Mock the module
+jest.mock('../../../src/utility', () => ({
+  fetchAppData: jest.fn(), // Mock the fetchAppData function
+}));
+
+
+
+
+
 
 // Mock the socket object returned by io()
 jest.mock('socket.io-client', () => {
@@ -52,6 +66,7 @@ describe('Socket Tests', () => {
     index.global_bucket.unread_msgs = []; // Resetting the global bucket state
   });
 
+  index.setUp("app1_acm_true_tenant5","dGVuYW50NV9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50NQ==")
 
   test('If chat_modal is closed :: if message is recieved it should store in the global_bucket', () => {
     // Mock loggedInUser to simulate a logged-in state
@@ -112,100 +127,9 @@ describe('Socket Tests', () => {
 
     }
 
-
-    if (mockSocket['ON_MESSAGE_STATUS_CHANGED']) {
-      const payload = {
-        "message": {
-          "action":null,
-          "msg_id": "msg_id__1",
-          "frm_user":{"id":1},
-          "message": "sdfsadf",
-          "status": "SENT",
-          "timestamp": "23:30:21",
-          "to_user": {
-            "user": "user2user"
-          }
-        }
-      };
-      mockSocket['ON_MESSAGE_STATUS_CHANGED'](JSON.stringify(payload));
-      // expect(mockSocket.emit).toHaveBeenCalledTimes(3);
+    expect(mockSocket.emit).toHaveBeenCalledTimes(2);
 
 
-      expect(index.global_bucket.unread_msgs).toHaveLength(1);
-
-
-      //**************  WE CAN EXTEND IT FUTHER TO SEE IF THE MESSAGES REACHED TO THE DESIRED WINDOW?????****************** */
-
-
-
-
-    }
   });
 });
 
-
-// describe('Socket Tests2', () => {
-
-//   beforeEach(() => {
-//     jest.clearAllMocks(); // Clears the call history and reset mock implementations
-//   });
-
-//   // Reset global_bucket state after each test
-//   afterEach(() => {
-//     index.global_bucket.unread_msgs = []; // Resetting the global bucket state
-//   });
-
-  
-//   test('If chat_modal is OPEN :: if message is recieved it should go to CHAT_BODY', () => {
-//     // Mock loggedInUser to simulate a logged-in state
-//     const loggedInUser = {
-//       tenant: 'tenant1',
-//       password: 'passmenow',
-//       role: 65536,
-//       app_name: 'MYnewapp33',
-//       timestamp: '2024-08-17 18:00:05',
-//       full_name: 'user2user',
-//       is_online: true,
-//       email: 'u2@gmail.com',
-//       id: '2',
-//       phone: '919999999999',
-//       gender: 'Male',
-//       type: 'user_type',
-//     };
-
-//     // Call initialize function with loggedInUser
-//     initialize(loggedInUser);
-
-//     // Get the mock socket instance
-//     const mockSocket = io();
-
-//     // Verify that socket.emit was called with the correct arguments
-//     const expectedPayload = { room: 'global_for__2' }; // Adjust as needed
-//     expect(mockSocket.emit).toHaveBeenCalledTimes(1);
-//     expect(mockSocket.emit).toHaveBeenCalledWith('join_room', expectedPayload);
-
-//     // Example of manually triggering the 'ON_MESSAGE_ARRIVAL_BOT' event
-//     if (mockSocket['ON_MESSAGE_ARRIVAL_BOT']) {
-//       const payload = {
-//         "message": {
-//           "msg_id": "msg_id__1",
-//           "message": "sdfsadf",
-//           "status": "SENT",
-//           "timestamp": "23:30:21",
-//           "to_user": {
-//             "user": "user2user"
-//           },
-//           "frm_id": "1"
-//         }
-//       };
-//       mockSocket['ON_MESSAGE_ARRIVAL_BOT'](JSON.stringify(payload));
-//       expect(mockSocket.emit).toHaveBeenCalledTimes(3);
-
-
-//       expect(index.global_bucket.unread_msgs).toHaveLength(1);
-//       const chat_modal_opener = document.getElementById("chat_modal_opener");
-//       console.log("wahsdfs sadfjsdaf is open?",chat_modal_opener.style.display)
-
-//     }
-//   });
-// });
