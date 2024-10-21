@@ -52,6 +52,7 @@ describe('Socket Tests', () => {
     index.global_bucket.unread_msgs = []; // Resetting the global bucket state
   });
 
+  index.setUp("app1_acm_true_tenant5","dGVuYW50NV9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50NQ==")
 
   test('If chat_modal is closed :: if message is recieved it should store in the global_bucket', () => {
     // Mock loggedInUser to simulate a logged-in state

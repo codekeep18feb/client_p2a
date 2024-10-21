@@ -16,7 +16,8 @@ describe('My logged in tests', () => {
   
   setUp("app1_acm_true_tenant5","dGVuYW50NV9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50NQ==")
   
-
+ 
+  
   test('should display correct content in chat modal [open]', async() => {
     // Mock loggedInUser to simulate a logged-in state
     const loggedInUser = {
