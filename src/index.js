@@ -5,8 +5,7 @@
 import "./style.css";
 import io from "socket.io-client";
 import myImage from "./tezkit_logo.jpg";
-
-// const APP_NAME = "app1_t2" // this should technically be fetched by credentials??
+import {fetchAppData} from "../src/utility"
 
 let global_bucket = { unread_msgs: [] };
 export { global_bucket };
@@ -14,6 +13,8 @@ export { global_bucket };
 // let user_msgs = []
 
 const identifiers = {};
+
+
 
 let chat_modal_open = false;
 export { chat_modal_open };
@@ -573,7 +574,8 @@ function addToMsgsLs(p_data) {
 }
 
 // Function to add a full-width header with a fixed height and red background color
-export function initialize(loggedInUser) {
+export async function initialize(loggedInU) {
+  let loggedInUser = loggedInU
   console.log("here iteste for tests???", loggedInUser);
   // Attach the function to the resize event
   window.addEventListener("resize", checkViewportSize);
@@ -614,7 +616,7 @@ export function initialize(loggedInUser) {
     } else if (tezkit_app_p_data.settings.authCloudManaged === false) {
       identifiers["name_idn"] = "uid";
     }
-    console.log("aerwer where herever", identifiers, tezkit_app_p_data);
+    console.log("aerwer where herever",loggedInUser, identifiers, tezkit_app_p_data);
   } else {
     const app_name = localStorage.getItem("tezkit_app_name");
     const api_key = localStorage.getItem("tezkit_api_key");
@@ -623,38 +625,14 @@ export function initialize(loggedInUser) {
     if (!app_name || !api_key) {
       console.error("app_name not provided to the client!");
     } else {
-      console.log("arerewrewrew");
-      const reqUrl = `https://gbzm6cqi21.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
-      const headersList = {
-        Accept: "*/*",
-        "X-API-Key": api_key, //THIS ONE SHOULD BE PICKED FROM index.html
-      };
+      
 
       try {
-        fetch(reqUrl, {
-          method: "GET",
-          headers: headersList,
-        })
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              console.error(
-                `Error: ${response.status} - ${response.statusText}`
-              );
-            }
-          })
-          .then((data) => {
-            if (data) {
-              console.log("APP DATA", data);
-              localStorage.setItem("tezkit_app_data", JSON.stringify(data));
-            }
-          })
-          .catch((error) => {
-            console.error("Request failed:", error);
-          });
+
+        await fetchAppData(app_name, api_key);
+    
       } catch (error) {
-        console.error("Request failed:", error);
+        console.error("Error occured!", error);
       }
     }
   }
@@ -852,11 +830,13 @@ export function initialize(loggedInUser) {
   if (tezkit_app_data) {
     const tezkit_app_p_data = JSON.parse(tezkit_app_data);
     console.log(
+      loggedInUser,
       "here is the tezkit_app_p_data.settings.authCloudManaged",
       tezkit_app_p_data
     );
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
+      console.log("dow eewrew!!",loggedInUser)
       if (!token) {
         console.log("dfgfghfghhjfrghfgsdfasdfasdfh");
 
@@ -871,7 +851,7 @@ export function initialize(loggedInUser) {
     renderAuthHeader();
   }
 
-  console.log("are we here yet!");
+  console.log("are we here yet!sdf",loggedInUser);
 
   // Create the modal element
   const modal = document.createElement("div");
@@ -886,7 +866,7 @@ export function initialize(loggedInUser) {
   document.body.appendChild(chat_modal);
 
   // Function to toggle the modal visibility
-  function toggleChatModal() {
+  function toggleChatModal(loggedInUser) {
     const chat_modal = document.getElementById("chatModal");
     console.log("sdfsdfsdafchat_modal_open", chat_modal_open);
 
@@ -927,11 +907,11 @@ export function initialize(loggedInUser) {
     chat_modal_open = !chat_modal_open;
   }
 
-  function closeModal() {
+  function closeModal(loggedInUser) {
     console.log("you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
-    toggleChatModal();
+    toggleChatModal(loggedInUser);
   }
 
   chat_modal.innerHTML = `
@@ -951,10 +931,10 @@ export function initialize(loggedInUser) {
   </div>
 `;
 
-  document.getElementById("close-btn").addEventListener("click", closeModal);
+  document.getElementById("close-btn").addEventListener("click", closeModal(loggedInUser));
 
   console.log(
-    "and if modal is open if logged into chat lets update the username on the chat header??"
+    "and if modal is open if logged into chat lets update the username on the chat header??",loggedInUser
   );
 
   // // Create an img element for the logo
