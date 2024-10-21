@@ -714,30 +714,39 @@ export async function initialize(loggedInUser) {
         });
 
         // Usage in toggleChatModal or socket.on
+        // console.log("tezkit_app_dadsfsdfta",tezkit_app_data,typeof(tezkit_app_data),JSON.parse(tezkit_app_data))
+        const tezkit_app_pdata = JSON.parse(tezkit_app_data)
+        console.log("tezkit_app_pdatadfds",tezkit_app_pdata)
 
-        socket.on("ON_USER_LIVE_STATUS", function (data) {
-          const p_data = JSON.parse(data);
-          console.log("is user going offline?", p_data);
+        // const tezkit_app_pdata = JSON.parse(tezkit_app_data)
+        
+        if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status){
 
-          if (!p_data.hasOwnProperty("status")) {
-            console.error("No status provided!");
-          } else {
-            const statusElement = document.getElementById("statusElement");
+            socket.on("ON_USER_LIVE_STATUS", function (data) {
+                      const p_data = JSON.parse(data);
+                      console.log("is user going offline?", p_data);
 
-            if (statusElement) {
-              if (p_data.status === true) {
-                console.log("Admin is Online");
-                statusElement.textContent = "";
-                statusElement.style.background = "#9acd32";
-              } else if (p_data.status === false) {
-                console.log("Admin is Offline");
-                statusElement.textContent = "";
-                statusElement.style.background = "#a99bbe";
-              }
-            }
-          }
-        });
+                      if (!p_data.hasOwnProperty("status")) {
+                        console.error("No status provided!");
+                      } else {
+                        const statusElement = document.getElementById("statusElement");
 
+                        if (statusElement) {
+                          if (p_data.status === true) {
+                            console.log("Admin is Online");
+                            statusElement.textContent = "";
+                            statusElement.style.background = "#9acd32";
+                          } else if (p_data.status === false) {
+                            console.log("Admin is Offline");
+                            statusElement.textContent = "";
+                            statusElement.style.background = "#a99bbe";
+                          }
+                        }
+                      }
+                    });
+
+        }
+        
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
 
@@ -877,9 +886,14 @@ export async function initialize(loggedInUser) {
       const statusElement = chatHeader.querySelector("#statusElement");
       console.log("identifiersfdgsd", identifiers);
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
-
+      const tezkit_app_pdata = JSON.parse(tezkit_app_data);
+      console.log("tezkit_app_pdata.beta_toggle.admin.live_statusa",tezkit_app_pdata)
+      
+      if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status){
       statusElement.textContent = "";
       statusElement.style.background = "#a99bbe";
+
+      }
     }
 
     chat_modal_open = !chat_modal_open;
