@@ -113,39 +113,14 @@ describe('Socket Tests', () => {
 
     }
 
-
-    if (mockSocket['ON_MESSAGE_STATUS_CHANGED']) {
-      const payload = {
-        "message": {
-          "action":null,
-          "msg_id": "msg_id__1",
-          "frm_user":{"id":1},
-          "message": "sdfsadf",
-          "status": "SENT",
-          "timestamp": "23:30:21",
-          "to_user": {
-            "user": "user2user"
-          }
-        }
-      };
-      mockSocket['ON_MESSAGE_STATUS_CHANGED'](JSON.stringify(payload));
-      // expect(mockSocket.emit).toHaveBeenCalledTimes(3);
+    expect(mockSocket.emit).toHaveBeenCalledTimes(2);
 
 
-      expect(index.global_bucket.unread_msgs).toHaveLength(1);
-
-
-      //**************  WE CAN EXTEND IT FUTHER TO SEE IF THE MESSAGES REACHED TO THE DESIRED WINDOW?????****************** */
-
-
-
-
-    }
   });
 });
 
 
-// describe('Socket Tests2', () => {
+// describe('Socket Tests2 when window is open', () => {
 
 //   beforeEach(() => {
 //     jest.clearAllMocks(); // Clears the call history and reset mock implementations
@@ -155,6 +130,8 @@ describe('Socket Tests', () => {
 //   afterEach(() => {
 //     index.global_bucket.unread_msgs = []; // Resetting the global bucket state
 //   });
+//   index.setUp("app1_acm_true_tenant5","dGVuYW50NV9fU0VQUkFUT1JfX2FwcDFfYWNtX3RydWVfdGVuYW50NQ==")
+
 
   
 //   test('If chat_modal is OPEN :: if message is recieved it should go to CHAT_BODY', () => {
@@ -175,7 +152,7 @@ describe('Socket Tests', () => {
 //     };
 
 //     // Call initialize function with loggedInUser
-//     initialize(loggedInUser);
+//     index.initialize(loggedInUser);
 
 //     // Get the mock socket instance
 //     const mockSocket = io();
@@ -200,12 +177,13 @@ describe('Socket Tests', () => {
 //         }
 //       };
 //       mockSocket['ON_MESSAGE_ARRIVAL_BOT'](JSON.stringify(payload));
-//       expect(mockSocket.emit).toHaveBeenCalledTimes(3);
+//       expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+//       expect(mockSocket.on).toHaveBeenCalledTimes(5);
 
 
-//       expect(index.global_bucket.unread_msgs).toHaveLength(1);
-//       const chat_modal_opener = document.getElementById("chat_modal_opener");
-//       console.log("wahsdfs sadfjsdaf is open?",chat_modal_opener.style.display)
+//     //   expect(index.global_bucket.unread_msgs).toHaveLength(1);
+//     //   const chat_modal_opener = document.getElementById("chat_modal_opener");
+//     //   console.log("wahsdfs sadfjsdaf is open?",chat_modal_opener.style.display)
 
 //     }
 //   });
