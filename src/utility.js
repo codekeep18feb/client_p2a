@@ -8,7 +8,7 @@ export async function fetchAppData(app_name, api_key) {
     }
   
     console.log("arerewrewrew");
-    const reqUrl = `https://gbzm6cqi21.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
+    const reqUrl = `https://5p6f350xba.execute-api.ap-south-1.amazonaws.com/prod/get_app?act_type=user&app_name=${app_name}`;
     const headersList = {
       Accept: "*/*",
       "X-API-Key": api_key, //THIS ONE SHOULD BE PICKED FROM index.html

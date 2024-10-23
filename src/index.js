@@ -4,6 +4,7 @@
 // Import the CSS file
 import "./style.css";
 import io from "socket.io-client";
+
 import myImage from "./tezkit_logo.jpg";
 import {fetchAppData} from "../src/utility"
 
@@ -723,7 +724,7 @@ export async function initialize(loggedInUser) {
         if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status){
 
             socket.on("ON_USER_LIVE_STATUS", function (data) {
-                      const p_data = JSON.parse(data);
+                      const p_data = data;
                       console.log("is user going offline?", p_data);
 
                       if (!p_data.hasOwnProperty("status")) {
