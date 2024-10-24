@@ -6,7 +6,7 @@ import "./style.css";
 import io from "socket.io-client";
 
 import myImage from "./tezkit_logo.jpg";
-import {fetchAppData} from "../src/utility"
+import { fetchAppData } from "../src/utility"
 
 let global_bucket = { unread_msgs: [] };
 export { global_bucket };
@@ -185,8 +185,8 @@ export function renderCustomizeComponent() {
 let socket;
 
 function addNewElementToChatBody(chatBody, obj, msg_type = "REGULAR") {
-  
-  console.log(msg_type,"this is when the msg is reieved??", obj);
+
+  console.log(msg_type, "this is when the msg is reieved??", obj);
 
   let append_msg = null;
   if (msg_type == "REGULAR") {
@@ -236,48 +236,48 @@ function addNewElementToChatBody(chatBody, obj, msg_type = "REGULAR") {
     console.log("reply message with original message", replyElement);
     replyWrapper.appendChild(replyElement);
     append_msg = replyWrapper;
-  } 
-  
+  }
+
   else if (msg_type === "FILE_MIXED") {
     const messageWrapper = document.createElement("div");
     messageWrapper.classList.add("message-container");
     const containerDiv = document.createElement('div');
-    console.log("here iam messageObj.message.result",obj.message.result)
+    console.log("here iam messageObj.message.result", obj.message.result)
     obj.message.result.forEach(paragraph => {
-        // Create a <p> element for each paragraph
-        const pElement = document.createElement('p');
-      
-        // Loop through each node (text or image) in the paragraph
-        paragraph.forEach(node => {
-          if (node.type === 'text') {
-            // Create a text node and append it to the paragraph
-            const textNode = document.createTextNode(node.value);
-            pElement.appendChild(textNode);
-          } else if (node.type === 'img') {
-            // Create an <img> element and append it to the paragraph
-            const imgElement = document.createElement('img');
-            imgElement.src = node.value;
-            imgElement.alt = 'Image';
-            imgElement.style.maxWidth = '100%'; // To ensure the image fits within the container
-            pElement.appendChild(imgElement);
-          }
-        });
-      
-        // Append the constructed <p> element to the container div
-        containerDiv.appendChild(pElement);
+      // Create a <p> element for each paragraph
+      const pElement = document.createElement('p');
+
+      // Loop through each node (text or image) in the paragraph
+      paragraph.forEach(node => {
+        if (node.type === 'text') {
+          // Create a text node and append it to the paragraph
+          const textNode = document.createTextNode(node.value);
+          pElement.appendChild(textNode);
+        } else if (node.type === 'img') {
+          // Create an <img> element and append it to the paragraph
+          const imgElement = document.createElement('img');
+          imgElement.src = node.value;
+          imgElement.alt = 'Image';
+          imgElement.style.maxWidth = '100%'; // To ensure the image fits within the container
+          pElement.appendChild(imgElement);
+        }
       });
+
+      // Append the constructed <p> element to the container div
+      containerDiv.appendChild(pElement);
+    });
 
 
     // Append the new message at the bottom of chatBody
     // chatBody.appendChild(messageWrapper);
-    containerDiv.setAttribute("class","file-mixed-content")
+    containerDiv.setAttribute("class", "file-mixed-content")
     messageWrapper.appendChild(containerDiv);
     append_msg = messageWrapper;
-  } 
-  
+  }
+
   else {
-    console.log("wjatsdfsdfmsg_type",msg_type)
-    console.error("no msg_type provided!",msg_type);
+    console.log("wjatsdfsdfmsg_type", msg_type)
+    console.error("no msg_type provided!", msg_type);
   }
   // const chatBody = document.getElementById("chatBody");
 
@@ -433,9 +433,9 @@ export function setUp(app_name, api_key, theme = null) {
       localStorage.setItem("tezkit_msgs_data", initial_msgs_data_str);
     } else {
       tezkit_msgs_data = localStorage.getItem("tezkit_msgs_data");
-      console.log(api_key,"watierewtezkit_msgs_data",tezkit_msgs_data,typeof(tezkit_msgs_data))
+      console.log(api_key, "watierewtezkit_msgs_data", tezkit_msgs_data, typeof (tezkit_msgs_data))
 
-      const tezkit_msgs_pdata = JSON.parse(tezkit_msgs_data) 
+      const tezkit_msgs_pdata = JSON.parse(tezkit_msgs_data)
       if (tezkit_msgs_pdata["api_key"] !== api_key) {
         // console.error("Api Key did not match; Should probably logout and login back.")
         renderErrorPopup([
@@ -544,6 +544,13 @@ function addToMsgsLs(p_data) {
   const prv_msg_data_string_ls = JSON.stringify(tezkit_msgs_p_data);
   localStorage.setItem("tezkit_msgs_data", prv_msg_data_string_ls);
 }
+function isKeyTrue(data, context, key,) {
+  console.log("dataconterkey", data, context, key,)
+  console.log("erwewqrwerrwertertewrt", data[context][key])
+  return data[context][key]
+}
+
+
 
 // Function to add a full-width header with a fixed height and red background color
 export async function initialize(loggedInUser) {
@@ -590,7 +597,7 @@ export async function initialize(loggedInUser) {
     } else if (tezkit_app_p_data.settings.authCloudManaged === false) {
       identifiers["name_idn"] = "uid";
     }
-    console.log("aerwer where herever",loggedInUser, identifiers, tezkit_app_p_data);
+    console.log("aerwer where herever", loggedInUser, identifiers, tezkit_app_p_data);
   } else {
     const app_name = localStorage.getItem("tezkit_app_name");
     const api_key = localStorage.getItem("tezkit_api_key");
@@ -599,12 +606,12 @@ export async function initialize(loggedInUser) {
     if (!app_name || !api_key) {
       console.error("app_name not provided to the client!");
     } else {
-      
+
 
       try {
 
         await fetchAppData(app_name, api_key);
-    
+
       } catch (error) {
         console.error("Error occured!", error);
       }
@@ -658,7 +665,7 @@ export async function initialize(loggedInUser) {
             );
             const msg = p_data["message"]["message"];
             const timestamp = p_data["message"]["timestamp"];
-            console.log("shoulebe ehtere",chatBody)
+            console.log("shoulebe ehtere", chatBody)
             addNewElementToChatBody(chatBody, p_data);
             informPeerSysAboutMsgStatus(socket, p_data.message.msg_id, "READ");
           } else {
@@ -717,37 +724,49 @@ export async function initialize(loggedInUser) {
         // Usage in toggleChatModal or socket.on
         // console.log("tezkit_app_dadsfsdfta",tezkit_app_data,typeof(tezkit_app_data),JSON.parse(tezkit_app_data))
         const tezkit_app_pdata = JSON.parse(tezkit_app_data)
-        console.log("tezkit_app_pdatadfds",tezkit_app_pdata)
+        console.log("whjerewrewr")
+        console.log("tezkit_app_pdatadfdsupdaterher condi right below", tezkit_app_pdata)
+
+        console.log(JSON.stringify(tezkit_app_pdata), "tezkit_app_pdata can you check if the key is found?", "recieve_live_status_of_consumer_at_admin"); // Output: false
+
+        const resultcond = isKeyTrue(tezkit_app_pdata.beta_toggle, 'consumer', 'recieve_live_status_of_consumer_at_admin');
+
+        console.log("here is result", resultcond); // This should output false
+
 
         // const tezkit_app_pdata = JSON.parse(tezkit_app_data)
-        
-        if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status){
 
-            socket.on("ON_USER_LIVE_STATUS", function (data) {
-                      const p_data = data;
-                      console.log("is user going offline?", p_data);
+        if (resultcond) {
 
-                      if (!p_data.hasOwnProperty("status")) {
-                        console.error("No status provided!");
-                      } else {
-                        const statusElement = document.getElementById("statusElement");
 
-                        if (statusElement) {
-                          if (p_data.status === true) {
-                            console.log("Admin is Online");
-                            statusElement.textContent = "";
-                            statusElement.style.background = "#9acd32";
-                          } else if (p_data.status === false) {
-                            console.log("Admin is Offline");
-                            statusElement.textContent = "";
-                            statusElement.style.background = "#a99bbe";
-                          }
-                        }
-                      }
-                    });
+
+
+
+          socket.on("ON_USER_LIVE_STATUS", function (data) {
+            const p_data = data;
+            console.log("is user going offline?", p_data);
+
+            if (!p_data.hasOwnProperty("status")) {
+              console.error("No status provided!");
+            } else {
+              const statusElement = document.getElementById("statusElement");
+
+              if (statusElement) {
+                if (p_data.status === true) {
+                  console.log("Admin is Online");
+                  statusElement.textContent = "";
+                  statusElement.style.background = "#9acd32";
+                } else if (p_data.status === false) {
+                  console.log("Admin is Offline");
+                  statusElement.textContent = "";
+                  statusElement.style.background = "#a99bbe";
+                }
+              }
+            }
+          });
 
         }
-        
+
         socket.on("ON_FILE_UPLOAD", function (data) {
           // const p_data = JSON.parse(data);
 
@@ -811,7 +830,7 @@ export async function initialize(loggedInUser) {
       }
     }
   }
-  
+
 
   const token = localStorage.getItem("tezkit_token");
 
@@ -824,7 +843,7 @@ export async function initialize(loggedInUser) {
     );
 
     if (tezkit_app_p_data.settings.authCloudManaged) {
-      console.log("dow eewrew!!",loggedInUser)
+      console.log("dow eewrew!!", loggedInUser)
       if (!token) {
         console.log("dfgfghfghhjfrghfgsdfasdfasdfh");
 
@@ -839,7 +858,7 @@ export async function initialize(loggedInUser) {
     renderAuthHeader();
   }
 
-  console.log("are we here yet!sdf",loggedInUser);
+  console.log("are we here yet!sdf", loggedInUser);
 
   // Create the modal element
   const modal = document.createElement("div");
@@ -856,7 +875,7 @@ export async function initialize(loggedInUser) {
   // Function to toggle the modal visibility
   function toggleChatModal(loggedInUser) {
     const chat_modal = document.getElementById("chatModal");
-    console.log(loggedInUser,"sdfsdfsdafchat_modal_open", chat_modal_open);
+    console.log(loggedInUser, "sdfsdfsdafchat_modal_open", chat_modal_open);
 
     if (!chat_modal_open) {
       // Get the width and height of the window
@@ -877,7 +896,7 @@ export async function initialize(loggedInUser) {
       chat_modal.style.display = "none";
     }
 
-    console.log("ehertertertert",loggedInUser)
+    console.log("ehertertertert", loggedInUser)
     if (loggedInUser) {
       console.log("Now we can just updae the title");
 
@@ -888,11 +907,17 @@ export async function initialize(loggedInUser) {
       console.log("identifiersfdgsd", identifiers);
       loginMessage.textContent = loggedInUser.full_name || loggedInUser.uid;
       const tezkit_app_pdata = JSON.parse(tezkit_app_data);
-      console.log("tezkit_app_pdata.beta_toggle.admin.live_statusa",tezkit_app_pdata)
+      console.log("tezkit_app_pdata.beta_toggle.admin.live_statusa", tezkit_app_pdata)
+
+      // if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status) {
       
-      if (tezkit_app_pdata.beta_toggle && tezkit_app_pdata.beta_toggle.admin && tezkit_app_pdata.beta_toggle.admin.live_status){
-      statusElement.textContent = "";
-      statusElement.style.background = "#a99bbe";
+      const resultcond = isKeyTrue(tezkit_app_pdata.beta_toggle, 'consumer', 'recieve_live_status_of_consumer_at_admin');
+
+      console.log("here is result", resultcond); // T
+      
+      if (resultcond){
+        statusElement.textContent = "";
+        statusElement.style.background = "#a99bbe";
 
       }
     }
@@ -900,8 +925,8 @@ export async function initialize(loggedInUser) {
     chat_modal_open = !chat_modal_open;
   }
 
-  const closeModal = (loggedInUser) =>{
-    console.log(loggedInUser,"you click on close btn", chat_modal_open);
+  const closeModal = (loggedInUser) => {
+    console.log(loggedInUser, "you click on close btn", chat_modal_open);
     // chat_modal.style.display = 'none';
     // chat_modal_open = !chat_modal_open
     toggleChatModal(loggedInUser);
@@ -923,13 +948,13 @@ export async function initialize(loggedInUser) {
       <button id="sendButton">Send</button>
   </div>
 `;
-console.log("what is this loggedInUser",loggedInUser)
+  console.log("what is this loggedInUser", loggedInUser)
 
-// document.getElementById("close-btn").addEventListener("click", (loggedInUser)=>closeModal(loggedInUser));
-document.getElementById("close-btn").addEventListener("click", () => closeModal(loggedInUser));
+  // document.getElementById("close-btn").addEventListener("click", (loggedInUser)=>closeModal(loggedInUser));
+  document.getElementById("close-btn").addEventListener("click", () => closeModal(loggedInUser));
 
   console.log(
-    "and if modal is open if logged into chat lets update the username on the chat header??",loggedInUser
+    "and if modal is open if logged into chat lets update the username on the chat header??", loggedInUser
   );
 
   // // Create an img element for the logo
@@ -961,29 +986,29 @@ document.getElementById("close-btn").addEventListener("click", () => closeModal(
   chat_modal_opener.style.color = "#fff";
   chat_modal_opener.style.fontSize = "24px";
 
-  console.log("loggedINuserwhat is this1 ",loggedInUser)
+  console.log("loggedINuserwhat is this1 ", loggedInUser)
   chat_modal_opener.addEventListener("click", () => {
     console.log(tezkit_app_data, "here is bucket's data", loggedInUser);
 
     if (global_bucket) {
-        global_bucket.unread_msgs.forEach((p_data) => {
-            console.log("what is this after reload?", p_data);
-            updateNotificationBell(tezkit_app_data);
-            const msg = p_data["message"]["message"];
-            const timestamp = p_data["message"]["timestamp"];
-            const msg_id = p_data["message"]["msg_id"];
+      global_bucket.unread_msgs.forEach((p_data) => {
+        console.log("what is this after reload?", p_data);
+        updateNotificationBell(tezkit_app_data);
+        const msg = p_data["message"]["message"];
+        const timestamp = p_data["message"]["timestamp"];
+        const msg_id = p_data["message"]["msg_id"];
 
-            addNewElementToChatBody(chatBody, p_data);
-            informPeerSysAboutMsgStatus(socket, msg_id, "READ");
-        });
-        global_bucket.unread_msgs = [];
+        addNewElementToChatBody(chatBody, p_data);
+        informPeerSysAboutMsgStatus(socket, msg_id, "READ");
+      });
+      global_bucket.unread_msgs = [];
     }
     console.log("loggedINuserwhat is this2", loggedInUser);
 
     toggleChatModal(loggedInUser);
-});
+  });
 
-console.log("loggedINuserwhat is this3 ",loggedInUser)
+  console.log("loggedINuserwhat is this3 ", loggedInUser)
 
   chat_modal_container.appendChild(chat_modal_opener);
   document.body.appendChild(chat_modal_container);
